@@ -10,6 +10,7 @@ import ListaAtletasScreen from '../screens/ListaAtletasScreen';
 import PerfilAtletaScreen from '../screens/PerfilAtletaScreen';
 import AgendaSemanalScreen from '../screens/AgendaSemanalScreen';
 import CrearSesionScreen from '../screens/CrearSesionScreen';
+import RegistroAsistenciaScreen from '../screens/RegistroAsistenciaScreen';
 
 export type RootStackParamList = {
   Registro: undefined;
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   PerfilAtleta: { atletaId?: number };
   AgendaSemanal: undefined;
   CrearSesion: { sesionId?: number };
+  RegistroAsistencia: { sesionId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -52,8 +54,9 @@ export default function AppNavigator() {
         <Stack.Screen name="Principal"    component={PrincipalScreen}    options={{ headerShown: false }} />
         <Stack.Screen name="ListaAtletas"  component={ListaAtletasScreen}  options={{ title: 'Atletas' }} />
         <Stack.Screen name="PerfilAtleta"  component={PerfilAtletaScreen}  options={{ title: 'Perfil de atleta' }} />
-        <Stack.Screen name="AgendaSemanal" component={AgendaSemanalScreen} options={{ title: 'Agenda semanal' }} />
-        <Stack.Screen name="CrearSesion"   component={CrearSesionScreen}   options={{ title: 'Nueva sesión' }} />
+        <Stack.Screen name="AgendaSemanal"      component={AgendaSemanalScreen}      options={{ title: 'Agenda semanal' }} />
+        <Stack.Screen name="CrearSesion"         component={CrearSesionScreen}         options={{ title: 'Nueva sesión' }} />
+        <Stack.Screen name="RegistroAsistencia"  component={RegistroAsistenciaScreen}  options={{ title: 'Asistencia' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

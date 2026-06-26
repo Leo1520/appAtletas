@@ -198,6 +198,16 @@ export default function CrearSesionScreen({ route, navigation }: Props) {
         )}
 
         {modoEditar && !yaEstaCancel && (
+          <TouchableOpacity
+            style={styles.botonAsistencia}
+            onPress={() => navigation.navigate('RegistroAsistencia', { sesionId: sesionId! })}
+          >
+            <Feather name="users" size={16} color="#2E4057" />
+            <Text style={styles.botonAsistenciaTexto}>  Registrar asistencia</Text>
+          </TouchableOpacity>
+        )}
+
+        {modoEditar && !yaEstaCancel && (
           <TouchableOpacity style={styles.botonCancelar} onPress={() => setModalCancelar(true)}>
             <Text style={styles.botonCancelarTexto}>Cancelar sesión</Text>
           </TouchableOpacity>
@@ -252,6 +262,12 @@ const styles = StyleSheet.create({
   },
   botonDeshabilitado: { opacity: 0.6 },
   botonGuardarTexto: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  botonAsistencia: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1.5, borderColor: '#2E4057', borderRadius: 8,
+    paddingVertical: 12, marginTop: 12,
+  },
+  botonAsistenciaTexto: { color: '#2E4057', fontSize: 15, fontWeight: '600' },
   botonCancelar: {
     borderWidth: 1, borderColor: '#C0392B', borderRadius: 8,
     paddingVertical: 12, alignItems: 'center', marginTop: 12,

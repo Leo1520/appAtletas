@@ -119,6 +119,7 @@ export default function AgendaSemanalScreen({ navigation }: Props) {
                   key={sesion.id}
                   sesion={sesion}
                   onPress={() => navigation.navigate('CrearSesion', { sesionId: sesion.id })}
+                  onAsistencia={() => navigation.navigate('RegistroAsistencia', { sesionId: sesion.id })}
                 />
               ))}
             </View>
@@ -129,7 +130,13 @@ export default function AgendaSemanalScreen({ navigation }: Props) {
   );
 }
 
-function TarjetaSesion({ sesion, onPress }: { sesion: Sesion; onPress: () => void }) {
+function TarjetaSesion({
+  sesion, onPress, onAsistencia,
+}: {
+  sesion: Sesion;
+  onPress: () => void;
+  onAsistencia: () => void;
+}) {
   const cancelada = sesion.estado === 'cancelada';
 
   return (
@@ -171,6 +178,16 @@ function TarjetaSesion({ sesion, onPress }: { sesion: Sesion; onPress: () => voi
       {cancelada && sesion.motivoCancelacion ? (
         <Text style={styles.motivoTexto}>Motivo: {sesion.motivoCancelacion}</Text>
       ) : null}
+
+      {!cancelada && (
+        <TouchableOpacity
+          style={styles.botonAsistencia}
+          onPress={(e) => { e.stopPropagation(); onAsistencia(); }}
+        >
+          <Feather name="users" size={13} color="#2E4057" />
+          <Text style={styles.botonAsistenciaTexto}>  Asistencia</Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 }
@@ -231,4 +248,11 @@ const styles = StyleSheet.create({
   motivoTexto: { fontSize: 12, color: '#999', fontStyle: 'italic', marginTop: 4 },
 
   botonAgregar: { marginRight: 4, padding: 4 },
+  botonAsistencia: {
+    flexDirection: 'row', alignItems: 'center',
+    alignSelf: 'flex-start', marginTop: 10,
+    borderWidth: 1, borderColor: '#2E4057', borderRadius: 6,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  botonAsistenciaTexto: { fontSize: 12, color: '#2E4057', fontWeight: '600' },
 });
