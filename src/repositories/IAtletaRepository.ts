@@ -6,6 +6,7 @@ export interface IAtletaRepository {
   desactivar(id: number): Promise<void>;
   obtenerPorId(id: number): Promise<Atleta | null>;
   listarActivos(): Promise<Atleta[]>;
+  listarTodos(): Promise<Atleta[]>;
   buscarPorNombre(nombre: string): Promise<Atleta[]>;
   listarDisciplinas(): Promise<string[]>;
   listarGrupos(): Promise<string[]>;

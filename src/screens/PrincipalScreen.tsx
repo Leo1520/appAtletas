@@ -25,6 +25,9 @@ export default function PrincipalScreen({ navigation }: Props) {
         <TouchableOpacity style={styles.botonMenu} onPress={() => navigation.navigate('RegistrarMarca')}>
           <Text style={styles.botonMenuTexto}>Cronómetro / Marcas</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.botonMenu} onPress={() => navigation.navigate('HistorialMarcas', {})}>
+          <Text style={styles.botonMenuTexto}>Historial</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.botonSalir} onPress={handleCerrarSesion}>

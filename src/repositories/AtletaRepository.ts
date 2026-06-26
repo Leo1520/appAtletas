@@ -90,6 +90,14 @@ export class AtletaRepository implements IAtletaRepository {
     return rows.map(mapearFila);
   }
 
+  async listarTodos(): Promise<Atleta[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<AtletaRow>(
+      'SELECT * FROM atletas ORDER BY apellido, nombre',
+    );
+    return rows.map(mapearFila);
+  }
+
   async listarDisciplinas(): Promise<string[]> {
     const db = await getDatabase();
     const rows = await db.getAllAsync<{ disciplina: string }>(

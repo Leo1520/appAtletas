@@ -288,6 +288,16 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
         </TouchableOpacity>
 
         {modoEditar && (
+          <TouchableOpacity
+            style={styles.botonHistorial}
+            onPress={() => navigation.navigate('HistorialMarcas', { atletaId: atletaId! })}
+          >
+            <Feather name="bar-chart-2" size={16} color="#2E4057" />
+            <Text style={styles.botonHistorialTexto}>  Ver historial de marcas</Text>
+          </TouchableOpacity>
+        )}
+
+        {modoEditar && (
           <TouchableOpacity style={styles.botonDesactivar} onPress={handleDesactivar}>
             <Text style={styles.botonDesactivarTexto}>Desactivar perfil</Text>
           </TouchableOpacity>
@@ -346,6 +356,12 @@ const styles = StyleSheet.create({
   },
   botonDeshabilitado: { opacity: 0.6 },
   botonGuardarTexto:  { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  botonHistorial: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: '#2E4057', borderRadius: 8,
+    paddingVertical: 12, marginTop: 12,
+  },
+  botonHistorialTexto: { color: '#2E4057', fontSize: 15, fontWeight: '500' },
   botonDesactivar: {
     borderWidth: 1, borderColor: '#C0392B', borderRadius: 8,
     paddingVertical: 12, alignItems: 'center', marginTop: 12,
