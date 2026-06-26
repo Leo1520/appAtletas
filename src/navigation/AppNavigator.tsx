@@ -13,6 +13,9 @@ import CrearSesionScreen from '../screens/CrearSesionScreen';
 import RegistroAsistenciaScreen from '../screens/RegistroAsistenciaScreen';
 import RegistrarMarcaScreen from '../screens/RegistrarMarcaScreen';
 import HistorialMarcasScreen from '../screens/HistorialMarcasScreen';
+import ListaCompetenciasScreen from '../screens/ListaCompetenciasScreen';
+import CrearCompetenciaScreen from '../screens/CrearCompetenciaScreen';
+import DetalleCompetenciaScreen from '../screens/DetalleCompetenciaScreen';
 
 export type RootStackParamList = {
   Registro: undefined;
@@ -25,6 +28,9 @@ export type RootStackParamList = {
   RegistroAsistencia: { sesionId: number };
   RegistrarMarca: undefined;
   HistorialMarcas: { atletaId?: number };
+  ListaCompetencias: undefined;
+  CrearCompetencia: Record<string, never>;
+  DetalleCompetencia: { competenciaId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,7 +68,10 @@ export default function AppNavigator() {
         <Stack.Screen name="CrearSesion"         component={CrearSesionScreen}         options={{ title: 'Nueva sesión' }} />
         <Stack.Screen name="RegistroAsistencia"  component={RegistroAsistenciaScreen}  options={{ title: 'Asistencia' }} />
         <Stack.Screen name="RegistrarMarca"      component={RegistrarMarcaScreen}      options={{ title: 'Registrar marca' }} />
-        <Stack.Screen name="HistorialMarcas"    component={HistorialMarcasScreen}    options={{ title: 'Historial de marcas' }} />
+        <Stack.Screen name="HistorialMarcas"      component={HistorialMarcasScreen}      options={{ title: 'Historial de marcas' }} />
+        <Stack.Screen name="ListaCompetencias"   component={ListaCompetenciasScreen}    options={{ title: 'Competencias' }} />
+        <Stack.Screen name="CrearCompetencia"    component={CrearCompetenciaScreen}     options={{ title: 'Nueva competencia' }} />
+        <Stack.Screen name="DetalleCompetencia"  component={DetalleCompetenciaScreen}   options={{ title: 'Competencia' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -39,6 +39,23 @@ function mapearCompetenciaAtleta(row: CompetenciaAtletaRow): CompetenciaAtleta {
 }
 
 export class CompetenciaRepository implements ICompetenciaRepository {
+  async listar(): Promise<Competencia[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<CompetenciaRow>(
+      'SELECT * FROM competencias ORDER BY fecha DESC, id DESC',
+    );
+    return rows.map(mapearCompetencia);
+  }
+
+  async obtenerPorId(id: number): Promise<Competencia | null> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<CompetenciaRow>(
+      'SELECT * FROM competencias WHERE id = ?',
+      id,
+    );
+    return row ? mapearCompetencia(row) : null;
+  }
+
   async crear(competencia: Omit<Competencia, 'id'>): Promise<Competencia> {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -61,11 +78,20 @@ export class CompetenciaRepository implements ICompetenciaRepository {
     return { id: result.lastInsertRowId, competenciaId, atletaId };
   }
 
+  async desconvocarAtleta(competenciaId: number, atletaId: number): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      'DELETE FROM competencia_atleta WHERE competencia_id = ? AND atleta_id = ?',
+      competenciaId,
+      atletaId,
+    );
+  }
+
   async registrarResultado(
     competenciaId: number,
     atletaId: number,
-    posicion: number,
-    marcaObtenida: number,
+    posicion: number | null,
+    marcaObtenida: number | null,
   ): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
