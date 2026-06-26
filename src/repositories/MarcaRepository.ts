@@ -56,6 +56,16 @@ export class MarcaRepository implements IMarcaRepository {
     return rows.map(mapearFila);
   }
 
+  async listarPorAtletaYDisciplina(atletaId: number, disciplina: string): Promise<Marca[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<MarcaRow>(
+      'SELECT * FROM marcas WHERE atleta_id = ? AND tipo = ? ORDER BY fecha DESC',
+      atletaId,
+      disciplina,
+    );
+    return rows.map(mapearFila);
+  }
+
   async marcarEsMarcaPersonal(id: number, esMarcaPersonal: boolean): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(

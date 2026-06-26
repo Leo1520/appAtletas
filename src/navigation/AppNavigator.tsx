@@ -11,6 +11,7 @@ import PerfilAtletaScreen from '../screens/PerfilAtletaScreen';
 import AgendaSemanalScreen from '../screens/AgendaSemanalScreen';
 import CrearSesionScreen from '../screens/CrearSesionScreen';
 import RegistroAsistenciaScreen from '../screens/RegistroAsistenciaScreen';
+import RegistrarMarcaScreen from '../screens/RegistrarMarcaScreen';
 
 export type RootStackParamList = {
   Registro: undefined;
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   AgendaSemanal: undefined;
   CrearSesion: { sesionId?: number };
   RegistroAsistencia: { sesionId: number };
+  RegistrarMarca: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -57,6 +59,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AgendaSemanal"      component={AgendaSemanalScreen}      options={{ title: 'Agenda semanal' }} />
         <Stack.Screen name="CrearSesion"         component={CrearSesionScreen}         options={{ title: 'Nueva sesión' }} />
         <Stack.Screen name="RegistroAsistencia"  component={RegistroAsistenciaScreen}  options={{ title: 'Asistencia' }} />
+        <Stack.Screen name="RegistrarMarca"      component={RegistrarMarcaScreen}      options={{ title: 'Registrar marca' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

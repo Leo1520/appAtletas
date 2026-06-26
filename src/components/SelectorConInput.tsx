@@ -11,13 +11,15 @@ interface Props {
   opciones: string[];
   onSeleccionar: (valor: string) => void;
   placeholder?: string;
-  labelNuevo?: string; // texto del item "agregar nuevo"
+  labelNuevo?: string;
+  permitirNuevo?: boolean; // false = oculta la opción "agregar nuevo"
 }
 
 export default function SelectorConInput({
   label, valor, opciones, onSeleccionar,
   placeholder = 'Seleccionar…',
   labelNuevo = '+ Agregar nuevo',
+  permitirNuevo = true,
 }: Props) {
   const [abierto, setAbierto]   = useState(false);
   const [modoNuevo, setModoNuevo] = useState(false);
@@ -40,7 +42,7 @@ export default function SelectorConInput({
     setTextoNuevo('');
   }
 
-  const items = [...opciones, '__nuevo__'];
+  const items = permitirNuevo ? [...opciones, '__nuevo__'] : opciones;
 
   return (
     <>
