@@ -1,0 +1,103 @@
+import { getDatabase } from '../database/database';
+import { Sesion } from '../types';
+import { ISesionRepository } from './ISesionRepository';
+
+interface SesionRow {
+  id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string | null;
+  descripcion: string;
+  disciplina: string;
+  lugar: string | null;
+  grupo: string | null;
+  estado: string;
+  motivo_cancelacion: string | null;
+}
+
+function mapearFila(row: SesionRow): Sesion {
+  return {
+    id:                 row.id,
+    fecha:              row.fecha,
+    horaInicio:         row.hora_inicio,
+    horaFin:            row.hora_fin ?? undefined,
+    descripcion:        row.descripcion,
+    disciplina:         row.disciplina,
+    lugar:              row.lugar ?? undefined,
+    grupo:              row.grupo ?? undefined,
+    estado:             row.estado,
+    motivoCancelacion:  row.motivo_cancelacion ?? undefined,
+  };
+}
+
+export class SesionRepository implements ISesionRepository {
+  async crear(sesion: Omit<Sesion, 'id'>): Promise<Sesion> {
+    const db = await getDatabase();
+    const result = await db.runAsync(
+      `INSERT INTO sesiones
+         (fecha, hora_inicio, hora_fin, descripcion, disciplina, lugar, grupo, estado, motivo_cancelacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sesion.fecha,
+      sesion.horaInicio,
+      sesion.horaFin ?? null,
+      sesion.descripcion,
+      sesion.disciplina,
+      sesion.lugar ?? null,
+      sesion.grupo ?? null,
+      sesion.estado,
+      sesion.motivoCancelacion ?? null,
+    );
+    return { ...sesion, id: result.lastInsertRowId };
+  }
+
+  async actualizar(sesion: Sesion): Promise<Sesion> {
+    const db = await getDatabase();
+    await db.runAsync(
+      `UPDATE sesiones
+       SET fecha = ?, hora_inicio = ?, hora_fin = ?, descripcion = ?,
+           disciplina = ?, lugar = ?, grupo = ?, estado = ?, motivo_cancelacion = ?
+       WHERE id = ?`,
+      sesion.fecha,
+      sesion.horaInicio,
+      sesion.horaFin ?? null,
+      sesion.descripcion,
+      sesion.disciplina,
+      sesion.lugar ?? null,
+      sesion.grupo ?? null,
+      sesion.estado,
+      sesion.motivoCancelacion ?? null,
+      sesion.id,
+    );
+    return sesion;
+  }
+
+  async cancelar(id: number, motivo: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      `UPDATE sesiones SET estado = 'cancelada', motivo_cancelacion = ? WHERE id = ?`,
+      motivo,
+      id,
+    );
+  }
+
+  async obtenerPorId(id: number): Promise<Sesion | null> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<SesionRow>(
+      'SELECT * FROM sesiones WHERE id = ?',
+      id,
+    );
+    return row ? mapearFila(row) : null;
+  }
+
+  async listarPorSemana(fechaInicio: string, fechaFin: string): Promise<Sesion[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<SesionRow>(
+      `SELECT * FROM sesiones
+       WHERE fecha BETWEEN ? AND ?
+       ORDER BY fecha, hora_inicio`,
+      fechaInicio,
+      fechaFin,
+    );
+    return rows.map(mapearFila);
+  }
+}
