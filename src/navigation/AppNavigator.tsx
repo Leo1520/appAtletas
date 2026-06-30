@@ -5,7 +5,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { hayEntrenadorRegistrado } from '../services/AuthService';
 import RegistroScreen from '../screens/RegistroScreen';
 import LoginScreen from '../screens/LoginScreen';
-import PrincipalScreen from '../screens/PrincipalScreen';
 import ListaAtletasScreen from '../screens/ListaAtletasScreen';
 import PerfilAtletaScreen from '../screens/PerfilAtletaScreen';
 import AgendaSemanalScreen from '../screens/AgendaSemanalScreen';
@@ -13,6 +12,7 @@ import CrearSesionScreen from '../screens/CrearSesionScreen';
 import RegistroAsistenciaScreen from '../screens/RegistroAsistenciaScreen';
 import RegistrarMarcaScreen from '../screens/RegistrarMarcaScreen';
 import HistorialMarcasScreen from '../screens/HistorialMarcasScreen';
+import MainTabNavigator from './MainTabNavigator';
 import ListaCompetenciasScreen from '../screens/ListaCompetenciasScreen';
 import CrearCompetenciaScreen from '../screens/CrearCompetenciaScreen';
 import DetalleCompetenciaScreen from '../screens/DetalleCompetenciaScreen';
@@ -61,7 +61,7 @@ export default function AppNavigator() {
       >
         <Stack.Screen name="Registro"     component={RegistroScreen}     options={{ title: 'Crear cuenta' }} />
         <Stack.Screen name="Login"        component={LoginScreen}        options={{ title: 'Ingresar' }} />
-        <Stack.Screen name="Principal"    component={PrincipalScreen}    options={{ headerShown: false }} />
+        <Stack.Screen name="Principal"    component={MainTabNavigator}   options={{ headerShown: false }} />
         <Stack.Screen name="ListaAtletas"  component={ListaAtletasScreen}  options={{ title: 'Atletas' }} />
         <Stack.Screen name="PerfilAtleta"  component={PerfilAtletaScreen}  options={{ title: 'Perfil de atleta' }} />
         <Stack.Screen name="AgendaSemanal"      component={AgendaSemanalScreen}      options={{ title: 'Agenda semanal' }} />
