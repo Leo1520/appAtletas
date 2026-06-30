@@ -61,4 +61,13 @@ export class EntrenadorRepository implements IEntrenadorRepository {
     );
     return row ? mapearFila(row) : null;
   }
+
+  async actualizarContrasena(correo: string, contrasenhaHash: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE entrenador SET contrasena = ? WHERE correo = ?',
+      contrasenhaHash,
+      correo,
+    );
+  }
 }

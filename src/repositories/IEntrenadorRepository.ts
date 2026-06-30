@@ -9,4 +9,5 @@ export interface IEntrenadorRepository {
     respuestaHash: string,
   ): Promise<Entrenador>;
   obtenerPorCorreo(correo: string): Promise<Entrenador | null>;
+  actualizarContrasena(correo: string, contrasenhaHash: string): Promise<void>;
 }

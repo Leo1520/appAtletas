@@ -40,3 +40,13 @@ export async function verificarRespuestaSeguridad(
   const respuestaHash = await hashear(respuesta.trim().toLowerCase());
   return entrenador.respuestaSeguridad === respuestaHash;
 }
+
+export async function obtenerPreguntaSeguridad(correo: string): Promise<string | null> {
+  const entrenador = await repo.obtenerPorCorreo(correo.trim().toLowerCase());
+  return entrenador?.preguntaSeguridad ?? null;
+}
+
+export async function cambiarContrasena(correo: string, nuevaContrasena: string): Promise<void> {
+  const hash = await hashear(nuevaContrasena);
+  await repo.actualizarContrasena(correo.trim().toLowerCase(), hash);
+}
