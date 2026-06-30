@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, FlatList, TouchableOpacity,
   StyleSheet, ActivityIndicator,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -13,22 +14,89 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ListaAtletas'>;
 
 const repo = new AtletaRepository();
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const COLORES_AVATAR = ['#2E4057', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#0EA5E9'];
+
+function colorAvatar(nombre: string): string {
+  const suma = nombre.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return COLORES_AVATAR[suma % COLORES_AVATAR.length];
+}
+
+function iniciales(atleta: Atleta): string {
+  return (atleta.nombre[0] ?? '').toUpperCase() + (atleta.apellido[0] ?? '').toUpperCase();
+}
+
+// ── Tarjeta ───────────────────────────────────────────────────────────────────
+function TarjetaAtleta({
+  atleta,
+  onEditar,
+  onHistorial,
+}: {
+  atleta: Atleta;
+  onEditar: () => void;
+  onHistorial: () => void;
+}) {
+  const bgAvatar = colorAvatar(atleta.apellido + atleta.nombre);
+  const esJuvenil = atleta.categoria === 'Juvenil';
+
+  return (
+    <TouchableOpacity style={styles.tarjeta} onPress={onEditar} activeOpacity={0.75}>
+      {/* Botón historial en esquina */}
+      <TouchableOpacity style={styles.historialBtn} onPress={onHistorial} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+        <Feather name="bar-chart-2" size={15} color="#9CA3AF" />
+      </TouchableOpacity>
+
+      {/* Avatar */}
+      <View style={[styles.avatar, { backgroundColor: bgAvatar }]}>
+        <Text style={styles.avatarLetra}>{iniciales(atleta)}</Text>
+      </View>
+
+      {/* Nombre */}
+      <Text style={styles.nombre} numberOfLines={2}>
+        {atleta.apellido},{'\n'}{atleta.nombre}
+      </Text>
+
+      {/* Badges */}
+      <View style={styles.badges}>
+        <View style={[styles.badge, esJuvenil ? styles.badgeJuvenil : styles.badgeInfantil]}>
+          <Text style={[styles.badgeTexto, esJuvenil ? styles.badgeTextoJuvenil : styles.badgeTextoInfantil]}>
+            {atleta.categoria}
+          </Text>
+        </View>
+        <View style={styles.badgeDisciplina}>
+          <Text style={styles.badgeDisciplinaTexto} numberOfLines={1}>{atleta.disciplina}</Text>
+        </View>
+      </View>
+
+      {/* Grupo */}
+      {atleta.grupo ? (
+        <Text style={styles.grupo} numberOfLines={1}>
+          <Feather name="users" size={11} color="#9CA3AF" /> {atleta.grupo}
+        </Text>
+      ) : null}
+    </TouchableOpacity>
+  );
+}
+
+// ── Pantalla ──────────────────────────────────────────────────────────────────
 export default function ListaAtletasScreen({ navigation }: Props) {
-  const [atletas, setAtletas]     = useState<Atleta[]>([]);
-  const [busqueda, setBusqueda]   = useState('');
-  const [cargando, setCargando]   = useState(true);
+  const [atletas, setAtletas]   = useState<Atleta[]>([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('PerfilAtleta', {})} style={styles.botonAgregar}>
-          <Text style={styles.botonAgregarTexto}>＋</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('PerfilAtleta', {})}
+          style={{ marginRight: 4 }}
+        >
+          <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '600' }}>Añadir</Text>
         </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
-  // Recarga la lista cada vez que la pantalla recibe el foco (ej: al volver desde PerfilAtleta)
   useFocusEffect(
     useCallback(() => {
       if (!busqueda.trim()) cargarActivos();
@@ -46,88 +114,124 @@ export default function ListaAtletasScreen({ navigation }: Props) {
   async function cargarActivos() {
     setCargando(true);
     try {
-      const lista = await repo.listarActivos();
-      setAtletas(lista);
+      setAtletas(await repo.listarActivos());
     } finally {
       setCargando(false);
     }
   }
 
-  function renderItem({ item }: { item: Atleta }) {
-    return (
-      <TouchableOpacity
-        style={styles.tarjeta}
-        onPress={() => navigation.navigate('PerfilAtleta', { atletaId: item.id })}
-      >
-        <Text style={styles.nombre}>{item.apellido}, {item.nombre}</Text>
-        <Text style={styles.detalle}>{item.categoria} · {item.disciplina}</Text>
-        {item.grupo ? <Text style={styles.grupo}>Grupo: {item.grupo}</Text> : null}
-      </TouchableOpacity>
-    );
-  }
-
   return (
     <View style={styles.contenedor}>
-      <TextInput
-        style={styles.buscador}
-        value={busqueda}
-        onChangeText={setBusqueda}
-        placeholder="Buscar por nombre o apellido…"
-        placeholderTextColor="#999"
-        clearButtonMode="while-editing"
-      />
+      {/* Buscador */}
+      <View style={styles.buscadorCont}>
+        <Feather name="search" size={15} color="#9CA3AF" />
+        <TextInput
+          style={styles.buscador}
+          value={busqueda}
+          onChangeText={setBusqueda}
+          placeholder="Buscar por nombre o apellido…"
+          placeholderTextColor="#9CA3AF"
+        />
+        {busqueda.length > 0 && (
+          <TouchableOpacity onPress={() => setBusqueda('')}>
+            <Feather name="x" size={15} color="#9CA3AF" />
+          </TouchableOpacity>
+        )}
+      </View>
 
       {cargando ? (
-        <ActivityIndicator style={styles.carga} color="#2E4057" />
+        <ActivityIndicator style={{ marginTop: 40 }} color="#2E4057" />
       ) : (
         <FlatList
           data={atletas}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={atletas.length === 0 ? styles.listaVacia : styles.lista}
+          keyExtractor={(a) => a.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.columna}
+          contentContainerStyle={atletas.length === 0 ? styles.vacioCont : styles.lista}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.vacio}>
-              {busqueda.trim()
-                ? 'Sin resultados para esa búsqueda.'
-                : 'No hay atletas registrados aún.\nAgrega el primero con el botón +'}
-            </Text>
+            <View style={styles.vacioInner}>
+              <Feather name="users" size={44} color="#D1D5DB" />
+              <Text style={styles.vacioTexto}>
+                {busqueda.trim()
+                  ? 'Sin resultados para esa búsqueda.'
+                  : 'No hay atletas registrados.\nToca Añadir para crear el primero.'}
+              </Text>
+            </View>
           }
+          renderItem={({ item }) => (
+            <TarjetaAtleta
+              atleta={item}
+              onEditar={() => navigation.navigate('PerfilAtleta', { atletaId: item.id })}
+              onHistorial={() => navigation.navigate('HistorialMarcas', { atletaId: item.id })}
+            />
+          )}
         />
       )}
     </View>
   );
 }
 
+// ── Estilos ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: '#F5F5F5' },
-  buscador: {
-    margin: 16,
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#333',
+  contenedor: { flex: 1, backgroundColor: '#F0F2F5' },
+
+  buscadorCont: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    margin: 16, paddingHorizontal: 12, paddingVertical: 10,
+    backgroundColor: '#FFF', borderRadius: 10,
+    borderWidth: 1, borderColor: '#E5E7EB',
   },
-  lista: { paddingHorizontal: 16, paddingBottom: 24 },
-  listaVacia: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  buscador: { flex: 1, fontSize: 14, color: '#333' },
+
+  lista:    { padding: 8, paddingBottom: 24 },
+  columna:  { justifyContent: 'space-between', paddingHorizontal: 8, marginBottom: 0 },
+  vacioCont:{ flex: 1 },
+  vacioInner:{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
+  vacioTexto:{ color: '#9CA3AF', fontSize: 14, textAlign: 'center', marginTop: 12, lineHeight: 20 },
+
+  // Tarjeta
   tarjeta: {
     backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 10,
-    elevation: 2,
+    borderRadius: 14,
+    padding: 14,
+    margin: 6,
+    flex: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    position: 'relative',
   },
-  nombre: { fontSize: 16, fontWeight: '600', color: '#2E4057' },
-  detalle: { fontSize: 13, color: '#666', marginTop: 3 },
-  grupo: { fontSize: 12, color: '#888', marginTop: 2 },
-  vacio: { fontSize: 15, color: '#888', textAlign: 'center', lineHeight: 22 },
-  carga: { marginTop: 40 },
-  botonAgregar: { marginRight: 4, padding: 4 },
-  botonAgregarTexto: { fontSize: 22, color: '#FFF', fontWeight: '300' },
+
+  // Historial icon (esquina superior derecha)
+  historialBtn: {
+    position: 'absolute', top: 12, right: 12,
+    padding: 2,
+  },
+
+  // Avatar
+  avatar: {
+    width: 48, height: 48, borderRadius: 24,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 10,
+  },
+  avatarLetra: { fontSize: 18, fontWeight: '700', color: '#FFF' },
+
+  // Nombre
+  nombre: { fontSize: 14, fontWeight: '700', color: '#1F2937', marginBottom: 8, lineHeight: 19 },
+
+  // Badges
+  badges:    { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 8 },
+  badge:     { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 },
+  badgeJuvenil:       { backgroundColor: '#D1FAE5' },
+  badgeTextoJuvenil:  { fontSize: 11, fontWeight: '600', color: '#065F46' },
+  badgeInfantil:      { backgroundColor: '#DBEAFE' },
+  badgeTextoInfantil: { fontSize: 11, fontWeight: '600', color: '#1E40AF' },
+  badgeDisciplina:    { backgroundColor: '#F1F5F9', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 },
+  badgeDisciplinaTexto: { fontSize: 11, color: '#475569', fontWeight: '500' },
+
+  // Grupo
+  grupo: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
 });
