@@ -11,6 +11,9 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
+  // Migración para DBs existentes
+  try { await db.execAsync('ALTER TABLE sesiones ADD COLUMN notification_id TEXT'); } catch { /* ya existe */ }
+
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
 
@@ -46,7 +49,8 @@ async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
       lugar              TEXT,
       grupo              TEXT,
       estado             TEXT    NOT NULL DEFAULT 'activa',
-      motivo_cancelacion TEXT
+      motivo_cancelacion TEXT,
+      notification_id    TEXT
     );
 
     CREATE TABLE IF NOT EXISTS asistencia (

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar, Image, Alert,
+  ScrollView, SafeAreaView, StatusBar, Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -79,7 +79,7 @@ export default function HomeScreen() {
   );
 
   function handleCampana() {
-    Alert.alert('Notificaciones', 'No hay notificaciones pendientes.');
+    navigation.navigate('Notificaciones');
   }
 
   return (

@@ -13,6 +13,7 @@ interface SesionRow {
   grupo: string | null;
   estado: string;
   motivo_cancelacion: string | null;
+  notification_id: string | null;
 }
 
 function mapearFila(row: SesionRow): Sesion {
@@ -27,6 +28,7 @@ function mapearFila(row: SesionRow): Sesion {
     grupo:              row.grupo ?? undefined,
     estado:             row.estado,
     motivoCancelacion:  row.motivo_cancelacion ?? undefined,
+    notificationId:     row.notification_id ?? undefined,
   };
 }
 
@@ -55,7 +57,8 @@ export class SesionRepository implements ISesionRepository {
     await db.runAsync(
       `UPDATE sesiones
        SET fecha = ?, hora_inicio = ?, hora_fin = ?, descripcion = ?,
-           disciplina = ?, lugar = ?, grupo = ?, estado = ?, motivo_cancelacion = ?
+           disciplina = ?, lugar = ?, grupo = ?, estado = ?, motivo_cancelacion = ?,
+           notification_id = ?
        WHERE id = ?`,
       sesion.fecha,
       sesion.horaInicio,
@@ -66,6 +69,7 @@ export class SesionRepository implements ISesionRepository {
       sesion.grupo ?? null,
       sesion.estado,
       sesion.motivoCancelacion ?? null,
+      sesion.notificationId ?? null,
       sesion.id,
     );
     return sesion;
@@ -97,6 +101,27 @@ export class SesionRepository implements ISesionRepository {
        ORDER BY fecha, hora_inicio`,
       fechaInicio,
       fechaFin,
+    );
+    return rows.map(mapearFila);
+  }
+
+  async actualizarNotificationId(id: number, notifId: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE sesiones SET notification_id = ? WHERE id = ?',
+      notifId,
+      id,
+    );
+  }
+
+  async listarProximas(fechas: string[]): Promise<Sesion[]> {
+    const db = await getDatabase();
+    const placeholders = fechas.map(() => '?').join(', ');
+    const rows = await db.getAllAsync<SesionRow>(
+      `SELECT * FROM sesiones
+       WHERE fecha IN (${placeholders}) AND estado = 'activa'
+       ORDER BY fecha, hora_inicio`,
+      ...fechas,
     );
     return rows.map(mapearFila);
   }

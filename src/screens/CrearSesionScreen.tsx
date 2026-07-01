@@ -11,6 +11,10 @@ import { AtletaRepository } from '../repositories/AtletaRepository';
 import { Sesion } from '../types';
 import SelectorConInput from '../components/SelectorConInput';
 import SelectorFechaHora from '../components/SelectorFechaHora';
+import {
+  programarNotificacionSesion,
+  cancelarNotificacionSesion,
+} from '../services/NotificacionService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CrearSesion'>;
 
@@ -36,8 +40,9 @@ export default function CrearSesionScreen({ route, navigation }: Props) {
   const [lugar, setLugar]           = useState('');
   const [grupo, setGrupo]           = useState('');
   const [disciplina, setDisciplina] = useState('');
-  const [estado, setEstado]         = useState('activa');
-  const [guardando, setGuardando]   = useState(false);
+  const [estado, setEstado]           = useState('activa');
+  const [notificationId, setNotifId]  = useState<string | undefined>(undefined);
+  const [guardando, setGuardando]     = useState(false);
 
   const [opcionesDisciplina, setOpcionesDisciplina] = useState<string[]>(DISCIPLINAS_SEMILLA);
   const [opcionesGrupo, setOpcionesGrupo]           = useState<string[]>([]);
@@ -75,6 +80,7 @@ export default function CrearSesionScreen({ route, navigation }: Props) {
     setGrupo(sesion.grupo ?? '');
     setDisciplina(sesion.disciplina);
     setEstado(sesion.estado);
+    setNotifId(sesion.notificationId);
   }
 
   function validar(): boolean {
@@ -105,7 +111,10 @@ export default function CrearSesionScreen({ route, navigation }: Props) {
         await sesionRepo.actualizar({ id: sesionId!, ...datos });
         Alert.alert('Listo', 'Sesión actualizada.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
       } else {
-        await sesionRepo.crear(datos);
+        const sesionCreada = await sesionRepo.crear(datos);
+        // Programar notificación y guardar su id
+        const notifId = await programarNotificacionSesion(sesionCreada);
+        if (notifId) await sesionRepo.actualizarNotificationId(sesionCreada.id, notifId);
         Alert.alert('Listo', 'Sesión creada.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
       }
     } catch {
@@ -122,6 +131,8 @@ export default function CrearSesionScreen({ route, navigation }: Props) {
     }
     try {
       await sesionRepo.cancelar(sesionId!, motivoCancelacion.trim());
+      // Cancelar notificación programada si existía
+      if (notificationId) await cancelarNotificacionSesion(notificationId);
       setModalCancelar(false);
       navigation.goBack();
     } catch {

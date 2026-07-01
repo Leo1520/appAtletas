@@ -31,6 +31,7 @@ export interface Sesion {
   grupo?: string;
   estado: string;             // 'activa' | 'cancelada' | 'finalizada'
   motivoCancelacion?: string;
+  notificationId?: string;
 }
 
 // estado: 'P' = Presente, 'A' = Ausente, 'L' = Licencia

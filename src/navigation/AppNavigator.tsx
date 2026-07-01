@@ -17,6 +17,7 @@ import ListaCompetenciasScreen from '../screens/ListaCompetenciasScreen';
 import CrearCompetenciaScreen from '../screens/CrearCompetenciaScreen';
 import DetalleCompetenciaScreen from '../screens/DetalleCompetenciaScreen';
 import EstadisticasScreen from '../screens/EstadisticasScreen';
+import NotificacionesScreen from '../screens/NotificacionesScreen';
 
 export type RootStackParamList = {
   Registro: undefined;
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   CrearCompetencia: Record<string, never>;
   DetalleCompetencia: { competenciaId: number };
   Estadisticas: undefined;
+  Notificaciones: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -74,7 +76,8 @@ export default function AppNavigator() {
         <Stack.Screen name="ListaCompetencias"   component={ListaCompetenciasScreen}    options={{ title: 'Competencias' }} />
         <Stack.Screen name="CrearCompetencia"    component={CrearCompetenciaScreen}     options={{ title: 'Nueva competencia' }} />
         <Stack.Screen name="DetalleCompetencia"  component={DetalleCompetenciaScreen}   options={{ title: 'Competencia' }} />
-        <Stack.Screen name="Estadisticas"        component={EstadisticasScreen}          options={{ title: 'Estadísticas' }} />
+        <Stack.Screen name="Estadisticas"    component={EstadisticasScreen}    options={{ title: 'Estadísticas' }} />
+        <Stack.Screen name="Notificaciones" component={NotificacionesScreen}  options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
