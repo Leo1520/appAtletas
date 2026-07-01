@@ -67,20 +67,21 @@ export default function SelectorFoto({ valor, onFotoSeleccionada, size = 100 }: 
         'Foto de perfil',
         'Podrás recortar la imagen antes de guardar.',
         [
-          { text: 'Tomar foto',        onPress: tomarFoto },
+          { text: 'Tomar foto', onPress: tomarFoto },
           { text: 'Elegir de galería', onPress: elegirDeGaleria },
-          { text: 'Eliminar foto',     style: 'destructive', onPress: () => onFotoSeleccionada('') },
-          { text: 'Cancelar',          style: 'cancel' },
+          { text: 'Eliminar foto', onPress: () => onFotoSeleccionada('') },
+          { text: 'Cancelar', style: 'cancel' },
         ],
+        { cancelable: true }
       );
     } else {
       Alert.alert(
         'Foto de perfil',
         'Podrás recortar la imagen antes de guardar.',
         [
-          { text: 'Tomar foto',        onPress: tomarFoto },
+          { text: 'Tomar foto', onPress: tomarFoto },
           { text: 'Elegir de galería', onPress: elegirDeGaleria },
-          { text: 'Cancelar',          style: 'cancel' },
+          { text: 'Cancelar', style: 'cancel' },
         ],
       );
     }
