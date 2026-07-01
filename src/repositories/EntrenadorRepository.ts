@@ -6,6 +6,7 @@ interface EntrenadorRow {
   id: number;
   correo: string;
   contrasena: string;
+  nombre: string | null;
   pregunta_seguridad: string | null;
   respuesta_seguridad: string | null;
   foto_uri: string | null;
@@ -16,6 +17,7 @@ function mapearFila(row: EntrenadorRow): Entrenador {
     id:                 row.id,
     correo:             row.correo,
     contrasena:         row.contrasena,
+    nombre:             row.nombre ?? undefined,
     preguntaSeguridad:  row.pregunta_seguridad ?? undefined,
     respuestaSeguridad: row.respuesta_seguridad ?? undefined,
     fotoUri:            row.foto_uri ?? undefined,
@@ -36,20 +38,23 @@ export class EntrenadorRepository implements IEntrenadorRepository {
     contrasenhaHash: string,
     preguntaSeguridad: string,
     respuestaHash: string,
+    nombre: string,
   ): Promise<Entrenador> {
     const db = await getDatabase();
     const result = await db.runAsync(
-      `INSERT INTO entrenador (correo, contrasena, pregunta_seguridad, respuesta_seguridad)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO entrenador (correo, contrasena, pregunta_seguridad, respuesta_seguridad, nombre)
+       VALUES (?, ?, ?, ?, ?)`,
       correo,
       contrasenhaHash,
       preguntaSeguridad,
       respuestaHash,
+      nombre,
     );
     return {
       id:                 result.lastInsertRowId,
       correo,
       contrasena:         contrasenhaHash,
+      nombre,
       preguntaSeguridad,
       respuestaSeguridad: respuestaHash,
     };
@@ -78,6 +83,15 @@ export class EntrenadorRepository implements IEntrenadorRepository {
     await db.runAsync(
       'UPDATE entrenador SET foto_uri = ? WHERE id = ?',
       fotoUri,
+      id,
+    );
+  }
+
+  async actualizarNombre(id: number, nombre: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE entrenador SET nombre = ? WHERE id = ?',
+      nombre,
       id,
     );
   }

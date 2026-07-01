@@ -10,14 +10,19 @@ import { registrarEntrenador } from '../services/AuthService';
 type Props = NativeStackScreenProps<RootStackParamList, 'Registro'>;
 
 export default function RegistroScreen({ navigation }: Props) {
-  const [correo, setCorreo]                   = useState('');
-  const [contrasena, setContrasena]           = useState('');
-  const [confirmar, setConfirmar]             = useState('');
-  const [pregunta, setPregunta]               = useState('');
-  const [respuesta, setRespuesta]             = useState('');
-  const [guardando, setGuardando]             = useState(false);
+  const [nombre, setNombre]           = useState('');
+  const [correo, setCorreo]           = useState('');
+  const [contrasena, setContrasena]   = useState('');
+  const [confirmar, setConfirmar]     = useState('');
+  const [pregunta, setPregunta]       = useState('');
+  const [respuesta, setRespuesta]     = useState('');
+  const [guardando, setGuardando]     = useState(false);
 
   async function handleRegistrar() {
+    if (nombre.trim().length < 2) {
+      Alert.alert('Campo requerido', 'Ingresa tu nombre completo (mínimo 2 caracteres).');
+      return;
+    }
     if (!correo.trim()) {
       Alert.alert('Campo requerido', 'Ingresa tu correo electrónico.');
       return;
@@ -37,7 +42,7 @@ export default function RegistroScreen({ navigation }: Props) {
 
     setGuardando(true);
     try {
-      await registrarEntrenador(correo, contrasena, pregunta, respuesta);
+      await registrarEntrenador(correo, contrasena, pregunta, respuesta, nombre);
       navigation.replace('Principal');
     } catch {
       Alert.alert('Error', 'No se pudo crear la cuenta. Intenta de nuevo.');
@@ -50,6 +55,16 @@ export default function RegistroScreen({ navigation }: Props) {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.contenedor} keyboardShouldPersistTaps="handled">
         <Text style={styles.titulo}>Crear cuenta</Text>
+
+        <Text style={styles.etiqueta}>Nombre completo</Text>
+        <TextInput
+          style={styles.input}
+          value={nombre}
+          onChangeText={setNombre}
+          placeholder="Tu nombre completo"
+          placeholderTextColor="#999"
+          autoCapitalize="words"
+        />
 
         <Text style={styles.etiqueta}>Correo electrónico</Text>
         <TextInput

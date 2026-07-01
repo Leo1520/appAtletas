@@ -1,27 +1,16 @@
 import React from 'react';
-import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
+import AgendaSemanalScreen from '../screens/AgendaSemanalScreen';
 import PerfilEntrenadorScreen from '../screens/PerfilEntrenadorScreen';
 
 const Tab = createBottomTabNavigator();
 
-function Placeholder({ titulo }: { titulo: string }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F0F2F5' }}>
-      <Feather name="clock" size={44} color="#D1D5DB" />
-      <Text style={{ color: '#9CA3AF', fontSize: 15, marginTop: 14, fontWeight: '600' }}>{titulo}</Text>
-      <Text style={{ color: '#D1D5DB', fontSize: 13, marginTop: 4 }}>Próximamente</Text>
-    </View>
-  );
-}
-
 const ICONOS: Record<string, React.ComponentProps<typeof Feather>['name']> = {
-  Home:            'home',
-  Notificaciones:  'bell',
-  Estadisticas:    'bar-chart-2',
-  Perfil:          'user',
+  Home:   'home',
+  Agenda: 'calendar',
+  Perfil: 'user',
 };
 
 export default function MainTabNavigator() {
@@ -44,28 +33,9 @@ export default function MainTabNavigator() {
         ),
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ title: 'Home' }}
-      />
-      <Tab.Screen
-        name="Notificaciones"
-        options={{ title: 'Notificaciones' }}
-      >
-        {() => <Placeholder titulo="Notificaciones" />}
-      </Tab.Screen>
-      <Tab.Screen
-        name="Estadisticas"
-        options={{ title: 'Estadísticas' }}
-      >
-        {() => <Placeholder titulo="Estadísticas" />}
-      </Tab.Screen>
-      <Tab.Screen
-        name="Perfil"
-        component={PerfilEntrenadorScreen}
-        options={{ title: 'Perfil' }}
-      />
+      <Tab.Screen name="Home"   component={HomeScreen}            options={{ title: 'Home' }} />
+      <Tab.Screen name="Agenda" component={AgendaSemanalScreen}   options={{ title: 'Agenda' }} />
+      <Tab.Screen name="Perfil" component={PerfilEntrenadorScreen} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
   );
 }

@@ -2,6 +2,7 @@ export interface Entrenador {
   id: number;
   correo: string;
   contrasena: string;
+  nombre?: string;
   preguntaSeguridad?: string;
   respuestaSeguridad?: string;
   fotoUri?: string;

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar, Image,
+  ScrollView, SafeAreaView, StatusBar, Image, Alert,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -48,27 +48,39 @@ const MODULOS: {
     icono: 'award',
     onPress: (nav) => nav.navigate('ListaCompetencias'),
   },
+  {
+    label: 'Estadísticas',
+    sub: 'Resumen del club',
+    icono: 'trending-up',
+    onPress: (nav) => nav.navigate('Estadisticas'),
+  },
 ];
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const [fotoUri, setFotoUri] = useState<string | undefined>(undefined);
+  const [nombre,  setNombre]  = useState<string>('');
 
   useFocusEffect(
     useCallback(() => {
       (async () => {
         try {
           const db = await getDatabase();
-          const row = await db.getFirstAsync<{ foto_uri: string | null }>(
-            'SELECT foto_uri FROM entrenador LIMIT 1',
+          const row = await db.getFirstAsync<{ foto_uri: string | null; nombre: string | null }>(
+            'SELECT foto_uri, nombre FROM entrenador LIMIT 1',
           );
           setFotoUri(row?.foto_uri ?? undefined);
+          setNombre(row?.nombre ?? '');
         } catch {
-          // sin foto, no crítico
+          // no crítico
         }
       })();
     }, []),
   );
+
+  function handleCampana() {
+    Alert.alert('Notificaciones', 'No hay notificaciones pendientes.');
+  }
 
   return (
     <View style={styles.raiz}>
@@ -78,17 +90,22 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.cabecera}>
         <View style={styles.cabeceraTop}>
           <Text style={styles.cabeceraClub}>Club Deportivo Linces</Text>
-          {fotoUri ? (
-            <Image source={{ uri: fotoUri }} style={styles.avatarFoto} resizeMode="cover" />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarLetra}>E</Text>
-            </View>
-          )}
+          <View style={styles.cabeceraAcciones}>
+            <TouchableOpacity onPress={handleCampana} style={styles.campanaBtn}>
+              <Feather name="bell" size={20} color="#FFF" />
+            </TouchableOpacity>
+            {fotoUri ? (
+              <Image source={{ uri: fotoUri }} style={styles.avatarFoto} resizeMode="cover" />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarLetra}>E</Text>
+              </View>
+            )}
+          </View>
         </View>
         <View style={styles.cabeceraBottom}>
           <Text style={styles.saludo}>Bienvenido,</Text>
-          <Text style={styles.saludoNombre}>Entrenador</Text>
+          <Text style={styles.saludoNombre}>{nombre || 'Entrenador'}</Text>
         </View>
       </SafeAreaView>
 
@@ -133,6 +150,13 @@ const styles = StyleSheet.create({
   cabeceraClub: {
     fontSize: 13, fontWeight: '700', color: '#FFF',
     textTransform: 'uppercase', letterSpacing: 0.8,
+    flex: 1,
+  },
+  cabeceraAcciones: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+  },
+  campanaBtn: {
+    padding: 4,
   },
   avatar: {
     width: 40, height: 40, borderRadius: 20,

@@ -1,17 +1,18 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { SesionRepository } from '../repositories/SesionRepository';
 import { Sesion } from '../types';
 import { dateToFecha } from '../components/SelectorFechaHora';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'AgendaSemanal'>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const repo = new SesionRepository();
 
@@ -37,31 +38,21 @@ function addDias(base: Date, dias: number): Date {
 function formatEncabezado(inicio: Date, fin: Date): string {
   const mismoMes = inicio.getMonth() === fin.getMonth();
   const mismoAnio = inicio.getFullYear() === fin.getFullYear();
-  const iniStr = `${DIAS_SEMANA[0]} ${inicio.getDate()} ${MESES[inicio.getMonth()]}`;
-  const finStr = `${DIAS_SEMANA[6]} ${fin.getDate()} ${MESES[fin.getMonth()]} ${fin.getFullYear()}`;
-  return mismoMes && mismoAnio
-    ? `${DIAS_SEMANA[0]} ${inicio.getDate()} – ${DIAS_SEMANA[6]} ${fin.getDate()} ${MESES[fin.getMonth()]} ${fin.getFullYear()}`
-    : `${iniStr} – ${finStr}`;
+  if (mismoMes && mismoAnio) {
+    return `${DIAS_SEMANA[0]} ${inicio.getDate()} – ${DIAS_SEMANA[6]} ${fin.getDate()} ${MESES[fin.getMonth()]} ${fin.getFullYear()}`;
+  }
+  return `${DIAS_SEMANA[0]} ${inicio.getDate()} ${MESES[inicio.getMonth()]} – ${DIAS_SEMANA[6]} ${fin.getDate()} ${MESES[fin.getMonth()]} ${fin.getFullYear()}`;
 }
 
 function formatDiaSeccion(date: Date): string {
   return `${DIAS_SEMANA[(date.getDay() + 6) % 7]} ${date.getDate()} de ${MESES[date.getMonth()]}`;
 }
 
-export default function AgendaSemanalScreen({ navigation }: Props) {
-  const [offset, setOffset]       = useState(0);
-  const [sesiones, setSesiones]   = useState<Sesion[]>([]);
-  const [cargando, setCargando]   = useState(true);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('CrearSesion', {})} style={styles.botonAgregar}>
-          <Feather name="plus" size={22} color="#FFF" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+export default function AgendaSemanalScreen() {
+  const navigation = useNavigation<Nav>();
+  const [offset, setOffset]     = useState(0);
+  const [sesiones, setSesiones] = useState<Sesion[]>([]);
+  const [cargando, setCargando] = useState(true);
 
   useFocusEffect(
     useCallback(() => { cargar(); }, [offset]),
@@ -82,7 +73,6 @@ export default function AgendaSemanalScreen({ navigation }: Props) {
   const inicioSemana = getInicioSemana(offset);
   const finSemana    = addDias(inicioSemana, 6);
 
-  // Agrupa sesiones por fecha y genera los 7 días
   const diasConSesiones = Array.from({ length: 7 }, (_, i) => {
     const dia  = addDias(inicioSemana, i);
     const str  = dateToFecha(dia);
@@ -99,6 +89,12 @@ export default function AgendaSemanalScreen({ navigation }: Props) {
         <Text style={styles.navTitulo}>{formatEncabezado(inicioSemana, finSemana)}</Text>
         <TouchableOpacity onPress={() => setOffset((o) => o + 1)} style={styles.navBtn}>
           <Feather name="chevron-right" size={22} color="#2E4057" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('CrearSesion', {})}
+          style={styles.btnNueva}
+        >
+          <Feather name="plus" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
 
@@ -195,30 +191,30 @@ function TarjetaSesion({
 const styles = StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: '#F5F5F5' },
 
-  // Navegación semanal
   navSemana: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#FFF', paddingVertical: 12, paddingHorizontal: 8,
+    backgroundColor: '#FFF', paddingVertical: 10, paddingHorizontal: 8,
     borderBottomWidth: 1, borderBottomColor: '#EEE',
   },
-  navBtn: { padding: 6 },
+  navBtn:    { padding: 6 },
   navTitulo: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '600', color: '#2E4057' },
+  btnNueva: {
+    backgroundColor: '#2E4057', borderRadius: 8,
+    padding: 6, marginLeft: 4,
+  },
 
   lista: { padding: 16, paddingBottom: 32 },
   carga: { marginTop: 40 },
 
-  // Vacío
   vacioCont: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   vacioTexto: { fontSize: 15, color: '#AAA', textAlign: 'center', marginTop: 12, lineHeight: 22 },
 
-  // Sección por día
   diaEncabezado: {
     fontSize: 13, fontWeight: '700', color: '#2E4057',
     textTransform: 'uppercase', letterSpacing: 0.5,
     marginTop: 16, marginBottom: 6,
   },
 
-  // Tarjeta de sesión
   tarjeta: {
     backgroundColor: '#FFF', borderRadius: 10, padding: 14,
     marginBottom: 10, elevation: 2,
@@ -237,8 +233,8 @@ const styles = StyleSheet.create({
     borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2,
     marginRight: 6, marginBottom: 2,
   },
-  chipCancelado: { color: '#999', backgroundColor: '#F0F0F0' },
-  lugar: { fontSize: 12, color: '#888' },
+  chipCancelado:  { color: '#999', backgroundColor: '#F0F0F0' },
+  lugar:          { fontSize: 12, color: '#888' },
   textoCancelado: { color: '#999', textDecorationLine: 'line-through' },
   badgeCancelada: {
     marginLeft: 'auto', backgroundColor: '#FEE2E2',
@@ -247,7 +243,6 @@ const styles = StyleSheet.create({
   badgeTexto:  { fontSize: 11, color: '#C0392B', fontWeight: '600' },
   motivoTexto: { fontSize: 12, color: '#999', fontStyle: 'italic', marginTop: 4 },
 
-  botonAgregar: { marginRight: 4, padding: 4 },
   botonAsistencia: {
     flexDirection: 'row', alignItems: 'center',
     alignSelf: 'flex-start', marginTop: 10,

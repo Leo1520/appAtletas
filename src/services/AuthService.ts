@@ -16,10 +16,11 @@ export async function registrarEntrenador(
   contrasena: string,
   preguntaSeguridad: string,
   respuestaSeguridad: string,
+  nombre: string,
 ): Promise<void> {
   const contrasenhaHash = await hashear(contrasena);
   const respuestaHash   = await hashear(respuestaSeguridad.trim().toLowerCase());
-  await repo.registrar(correo.trim().toLowerCase(), contrasenhaHash, preguntaSeguridad, respuestaHash);
+  await repo.registrar(correo.trim().toLowerCase(), contrasenhaHash, preguntaSeguridad, respuestaHash, nombre.trim());
 }
 
 export async function iniciarSesion(correo: string, contrasena: string): Promise<boolean> {
