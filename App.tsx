@@ -5,8 +5,15 @@ import { configurarCanal, solicitarPermisos } from './src/services/NotificacionS
 
 export default function App() {
   useEffect(() => {
-    configurarCanal();
-    solicitarPermisos();
+    (async () => {
+      try {
+        await configurarCanal();
+        await solicitarPermisos();
+      } catch (e) {
+        // Notificaciones no disponibles en Expo Go SDK 53+ — la app sigue funcionando
+        console.log('[App] init notificaciones error (ignorado en Expo Go):', e);
+      }
+    })();
   }, []);
 
   return (
