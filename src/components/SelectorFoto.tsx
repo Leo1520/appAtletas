@@ -62,26 +62,28 @@ export default function SelectorFoto({ valor, onFotoSeleccionada, size = 100 }: 
   }
 
   function handleTocar() {
-    const botones: React.ComponentProps<typeof Alert>['buttons'] = [
-      { text: 'Tomar foto',        onPress: tomarFoto },
-      { text: 'Elegir de galería', onPress: elegirDeGaleria },
-    ];
-
     if (valor) {
-      botones.push({
-        text: 'Eliminar foto',
-        style: 'destructive',
-        onPress: () => onFotoSeleccionada(''),
-      });
+      Alert.alert(
+        'Foto de perfil',
+        'Podrás recortar la imagen antes de guardar.',
+        [
+          { text: 'Tomar foto',        onPress: tomarFoto },
+          { text: 'Elegir de galería', onPress: elegirDeGaleria },
+          { text: 'Eliminar foto',     style: 'destructive', onPress: () => onFotoSeleccionada('') },
+          { text: 'Cancelar',          style: 'cancel' },
+        ],
+      );
+    } else {
+      Alert.alert(
+        'Foto de perfil',
+        'Podrás recortar la imagen antes de guardar.',
+        [
+          { text: 'Tomar foto',        onPress: tomarFoto },
+          { text: 'Elegir de galería', onPress: elegirDeGaleria },
+          { text: 'Cancelar',          style: 'cancel' },
+        ],
+      );
     }
-
-    botones.push({ text: 'Cancelar', style: 'cancel' });
-
-    Alert.alert(
-      'Foto de perfil',
-      'Podrás recortar la imagen antes de guardar.',
-      botones,
-    );
   }
 
   return (
