@@ -58,11 +58,11 @@ export async function programarNotificacionSesion(sesion: Sesion): Promise<strin
         title: '🏃 Club Linces - Entrenamiento',
         body: cuerpo,
         sound: true,
-        channelId: CANAL_ID,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: triggerDate,
+        channelId: CANAL_ID,
       },
     });
 
