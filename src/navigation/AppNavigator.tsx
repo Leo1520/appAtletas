@@ -60,7 +60,7 @@ export default function AppNavigator() {
         screenOptions={{ headerStyle: { backgroundColor: '#2E4057' }, headerTintColor: '#FFFFFF' }}
       >
         <Stack.Screen name="Registro"     component={RegistroScreen}     options={{ title: 'Crear cuenta' }} />
-        <Stack.Screen name="Login"        component={LoginScreen}        options={{ title: 'Ingresar' }} />
+        <Stack.Screen name="Login"        component={LoginScreen}        options={{ headerShown: false }} />
         <Stack.Screen name="Principal"    component={MainTabNavigator}   options={{ headerShown: false }} />
         <Stack.Screen name="ListaAtletas"  component={ListaAtletasScreen}  options={{ title: 'Atletas' }} />
         <Stack.Screen name="PerfilAtleta"  component={PerfilAtletaScreen}  options={{ title: 'Perfil de atleta' }} />

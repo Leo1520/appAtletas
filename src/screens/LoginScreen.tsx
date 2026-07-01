@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, Alert, Modal, ScrollView,
+  KeyboardAvoidingView, Platform, Alert, Modal, ScrollView, Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -129,9 +129,11 @@ export default function LoginScreen({ navigation }: Props) {
       >
         {/* Marca */}
         <View style={styles.marca}>
-          <View style={styles.escudo}>
-            <Feather name="shield" size={36} color="#FFF" />
-          </View>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.club}>Club Deportivo</Text>
           <Text style={styles.clubNombre}>Linces</Text>
         </View>
@@ -312,16 +314,11 @@ export default function LoginScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   flex:   { flex: 1, backgroundColor: '#2E4057' },
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingBottom: 32 },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingBottom: 40 },
 
   // Marca superior
-  marca: { alignItems: 'center', paddingTop: 52, paddingBottom: 36 },
-  escudo: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 12,
-  },
+  marca: { alignItems: 'center', paddingTop: 48, paddingBottom: 32 },
+  logo:  { width: 110, height: 110, marginBottom: 12 },
   club:       { fontSize: 13, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 1.5 },
   clubNombre: { fontSize: 28, fontWeight: '800', color: '#FFF', marginTop: 2 },
 

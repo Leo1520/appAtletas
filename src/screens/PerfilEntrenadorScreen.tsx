@@ -36,11 +36,11 @@ export default function PerfilEntrenadorScreen() {
   function handleCerrarSesion() {
     Alert.alert(
       'Cerrar sesión',
-      '¿Seguro que deseas salir?',
+      '¿Estás seguro de que deseas cerrar sesión?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Salir', style: 'destructive',
+          text: 'Cerrar sesión', style: 'destructive',
           onPress: () =>
             navigation.dispatch(
               CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }),
