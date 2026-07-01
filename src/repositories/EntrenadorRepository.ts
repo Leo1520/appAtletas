@@ -8,6 +8,7 @@ interface EntrenadorRow {
   contrasena: string;
   pregunta_seguridad: string | null;
   respuesta_seguridad: string | null;
+  foto_uri: string | null;
 }
 
 function mapearFila(row: EntrenadorRow): Entrenador {
@@ -17,6 +18,7 @@ function mapearFila(row: EntrenadorRow): Entrenador {
     contrasena:         row.contrasena,
     preguntaSeguridad:  row.pregunta_seguridad ?? undefined,
     respuestaSeguridad: row.respuesta_seguridad ?? undefined,
+    fotoUri:            row.foto_uri ?? undefined,
   };
 }
 
@@ -68,6 +70,15 @@ export class EntrenadorRepository implements IEntrenadorRepository {
       'UPDATE entrenador SET contrasena = ? WHERE correo = ?',
       contrasenhaHash,
       correo,
+    );
+  }
+
+  async actualizarFoto(id: number, fotoUri: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE entrenador SET foto_uri = ? WHERE id = ?',
+      fotoUri,
+      id,
     );
   }
 }

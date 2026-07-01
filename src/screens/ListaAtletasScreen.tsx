@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   View, Text, TextInput, FlatList, TouchableOpacity,
-  StyleSheet, ActivityIndicator,
+  StyleSheet, ActivityIndicator, Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -46,10 +46,18 @@ function TarjetaAtleta({
         <Feather name="bar-chart-2" size={15} color="#9CA3AF" />
       </TouchableOpacity>
 
-      {/* Avatar */}
-      <View style={[styles.avatar, { backgroundColor: bgAvatar }]}>
-        <Text style={styles.avatarLetra}>{iniciales(atleta)}</Text>
-      </View>
+      {/* Avatar o miniatura */}
+      {atleta.fotoUri ? (
+        <Image
+          source={{ uri: atleta.fotoUri }}
+          style={[styles.avatar, styles.avatarFoto]}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={[styles.avatar, { backgroundColor: bgAvatar }]}>
+          <Text style={styles.avatarLetra}>{iniciales(atleta)}</Text>
+        </View>
+      )}
 
       {/* Nombre */}
       <Text style={styles.nombre} numberOfLines={2}>
@@ -217,6 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 10,
   },
+  avatarFoto: { overflow: 'hidden' },
   avatarLetra: { fontSize: 18, fontWeight: '700', color: '#FFF' },
 
   // Nombre

@@ -10,6 +10,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { AtletaRepository } from '../repositories/AtletaRepository';
 import { Atleta } from '../types';
 import SelectorConInput from '../components/SelectorConInput';
+import SelectorFoto from '../components/SelectorFoto';
 
 const DISCIPLINAS_SEMILLA = [
   '100m', '200m', '400m', '800m', '1500m', '5000m',
@@ -54,6 +55,7 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
   const [categoria, setCategoria]   = useState('Infantil');
   const [disciplina, setDisciplina] = useState('');
   const [grupo, setGrupo]           = useState('');
+  const [fotoUri, setFotoUri]       = useState<string | undefined>(undefined);
   const [guardando, setGuardando]   = useState(false);
   const [avisoEdad, setAvisoEdad]   = useState('');
 
@@ -115,6 +117,7 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
     setCategoria(atleta.categoria);
     setDisciplina(atleta.disciplina);
     setGrupo(atleta.grupo ?? '');
+    setFotoUri(atleta.fotoUri);
   }
 
   // ── DateTimePicker ───────────────────────────────────────────────────────────
@@ -155,6 +158,7 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
       categoria,
       disciplina:      disciplina.trim(),
       grupo:           grupo.trim() || undefined,
+      fotoUri,
       activo:          true,
     };
     try {
@@ -194,6 +198,13 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.contenedor} keyboardShouldPersistTaps="handled">
+
+        {/* Foto de perfil */}
+        <SelectorFoto
+          valor={fotoUri}
+          onFotoSeleccionada={setFotoUri}
+          size={96}
+        />
 
         <Text style={styles.etiqueta}>Nombre</Text>
         <TextInput style={styles.input} value={nombre} onChangeText={setNombre}

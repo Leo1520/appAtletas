@@ -11,6 +11,13 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
+  // Migración: agrega foto_uri a entrenador si la tabla ya existe sin esa columna
+  try {
+    await db.execAsync('ALTER TABLE entrenador ADD COLUMN foto_uri TEXT');
+  } catch {
+    // La columna ya existe — ignorar
+  }
+
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
 

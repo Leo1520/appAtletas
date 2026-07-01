@@ -4,6 +4,7 @@ export interface Entrenador {
   contrasena: string;
   preguntaSeguridad?: string;
   respuestaSeguridad?: string;
+  fotoUri?: string;
 }
 
 export interface Atleta {

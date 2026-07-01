@@ -1,35 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, Alert,
+  SafeAreaView, Alert, ScrollView,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
 import { EntrenadorRepository } from '../repositories/EntrenadorRepository';
+import SelectorFoto from '../components/SelectorFoto';
 
 const repo = new EntrenadorRepository();
 
 export default function PerfilEntrenadorScreen() {
   const navigation = useNavigation();
-  const [correo, setCorreo] = useState('');
+  const [correo, setCorreo]   = useState('');
+  const [fotoUri, setFotoUri] = useState<string | undefined>(undefined);
+  const [entrenadorId, setEntrenadorId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Hay un solo entrenador registrado en la app
-    cargarCorreo();
+    cargarEntrenador();
   }, []);
 
-  async function cargarCorreo() {
+  async function cargarEntrenador() {
     try {
-      // Reutilizamos obtenerPorCorreo indirectamente via DB directa no disponible;
-      // usamos el repo para listar (sólo existe uno)
       const db = await import('../database/database').then((m) => m.getDatabase());
-      const row = await db.getFirstAsync<{ correo: string }>(
-        'SELECT correo FROM entrenador LIMIT 1',
+      const row = await db.getFirstAsync<{ id: number; correo: string; foto_uri: string | null }>(
+        'SELECT id, correo, foto_uri FROM entrenador LIMIT 1',
       );
-      if (row) setCorreo(row.correo);
+      if (row) {
+        setEntrenadorId(row.id);
+        setCorreo(row.correo);
+        setFotoUri(row.foto_uri ?? undefined);
+      }
     } catch {
-      // sin correo, no crítico
+      // no crítico
+    }
+  }
+
+  async function handleFotoSeleccionada(uri: string) {
+    if (entrenadorId === null) return;
+    setFotoUri(uri);
+    try {
+      await repo.actualizarFoto(entrenadorId, uri);
+    } catch {
+      Alert.alert('Error', 'No se pudo guardar la foto. Intenta de nuevo.');
     }
   }
 
@@ -56,12 +70,14 @@ export default function PerfilEntrenadorScreen() {
         <Text style={styles.cabeceraTitulo}>Perfil</Text>
       </SafeAreaView>
 
-      <View style={styles.cuerpo}>
-        {/* Avatar */}
+      <ScrollView contentContainerStyle={styles.cuerpo}>
+        {/* Foto de perfil */}
         <View style={styles.avatarCont}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarLetra}>E</Text>
-          </View>
+          <SelectorFoto
+            valor={fotoUri}
+            onFotoSeleccionada={handleFotoSeleccionada}
+            size={100}
+          />
           <Text style={styles.nombre}>Entrenador</Text>
           {correo ? <Text style={styles.correo}>{correo}</Text> : null}
         </View>
@@ -89,7 +105,7 @@ export default function PerfilEntrenadorScreen() {
           <Feather name="log-out" size={18} color="#C0392B" />
           <Text style={styles.botonSalirTexto}>  Cerrar sesión</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -100,19 +116,12 @@ const styles = StyleSheet.create({
   cabecera: { backgroundColor: '#2E4057', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
   cabeceraTitulo: { fontSize: 20, fontWeight: '700', color: '#FFF' },
 
-  cuerpo: { flex: 1, padding: 20 },
+  cuerpo: { padding: 20, paddingBottom: 40 },
 
   // Avatar
   avatarCont: { alignItems: 'center', marginTop: 24, marginBottom: 32 },
-  avatar: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#2E4057',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 12,
-  },
-  avatarLetra: { fontSize: 32, fontWeight: '800', color: '#FFF' },
-  nombre:      { fontSize: 20, fontWeight: '700', color: '#1F2937' },
-  correo:      { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  nombre:     { fontSize: 20, fontWeight: '700', color: '#1F2937', marginTop: 14 },
+  correo:     { fontSize: 14, color: '#6B7280', marginTop: 4 },
 
   // Sección info
   seccion: {
