@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useActionSheet } from '@expo/react-native-action-sheet';
 
 interface Props {
   valor?: string;
@@ -35,6 +36,7 @@ async function pedirPermisoGaleria(): Promise<boolean> {
 
 export default function SelectorFoto({ valor, onFotoSeleccionada, size = 100 }: Props) {
   const radio = size / 2;
+  const { showActionSheetWithOptions } = useActionSheet();
 
   async function tomarFoto() {
     if (!(await pedirPermisoCamara())) return;
@@ -63,26 +65,34 @@ export default function SelectorFoto({ valor, onFotoSeleccionada, size = 100 }: 
 
   function handleTocar() {
     if (valor) {
-      Alert.alert(
-        'Foto de perfil',
-        'Podrás recortar la imagen antes de guardar.',
-        [
-          { text: 'Tomar foto', onPress: tomarFoto },
-          { text: 'Elegir de galería', onPress: elegirDeGaleria },
-          { text: 'Eliminar foto', onPress: () => onFotoSeleccionada('') },
-          { text: 'Cancelar', style: 'cancel' },
-        ],
-        { cancelable: true }
+      showActionSheetWithOptions(
+        {
+          options: ['Tomar foto', 'Elegir de galería', 'Eliminar foto', 'Cancelar'],
+          cancelButtonIndex: 3,
+          destructiveButtonIndex: 2,
+          title: 'Foto de perfil',
+          message: 'Podrás recortar la imagen antes de guardar.',
+        },
+        (selectedIndex) => {
+          if (selectedIndex === 0) tomarFoto();
+          if (selectedIndex === 1) elegirDeGaleria();
+          if (selectedIndex === 2) onFotoSeleccionada('');
+          // 3 = Cancelar, no hace nada
+        },
       );
     } else {
-      Alert.alert(
-        'Foto de perfil',
-        'Podrás recortar la imagen antes de guardar.',
-        [
-          { text: 'Tomar foto', onPress: tomarFoto },
-          { text: 'Elegir de galería', onPress: elegirDeGaleria },
-          { text: 'Cancelar', style: 'cancel' },
-        ],
+      showActionSheetWithOptions(
+        {
+          options: ['Tomar foto', 'Elegir de galería', 'Cancelar'],
+          cancelButtonIndex: 2,
+          title: 'Foto de perfil',
+          message: 'Podrás recortar la imagen antes de guardar.',
+        },
+        (selectedIndex) => {
+          if (selectedIndex === 0) tomarFoto();
+          if (selectedIndex === 1) elegirDeGaleria();
+          // 2 = Cancelar, no hace nada
+        },
       );
     }
   }
