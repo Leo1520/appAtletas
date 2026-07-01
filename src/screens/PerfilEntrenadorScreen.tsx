@@ -39,9 +39,10 @@ export default function PerfilEntrenadorScreen() {
 
   async function handleFotoSeleccionada(uri: string) {
     if (entrenadorId === null) return;
-    setFotoUri(uri);
+    const nuevoUri = uri === '' ? undefined : uri;
+    setFotoUri(nuevoUri);
     try {
-      await repo.actualizarFoto(entrenadorId, uri);
+      await repo.actualizarFoto(entrenadorId, nuevoUri ?? null);
     } catch {
       Alert.alert('Error', 'No se pudo guardar la foto. Intenta de nuevo.');
     }

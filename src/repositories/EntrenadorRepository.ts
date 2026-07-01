@@ -73,7 +73,7 @@ export class EntrenadorRepository implements IEntrenadorRepository {
     );
   }
 
-  async actualizarFoto(id: number, fotoUri: string): Promise<void> {
+  async actualizarFoto(id: number, fotoUri: string | null): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
       'UPDATE entrenador SET foto_uri = ? WHERE id = ?',

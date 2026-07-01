@@ -202,7 +202,7 @@ export default function PerfilAtletaScreen({ route, navigation }: Props) {
         {/* Foto de perfil */}
         <SelectorFoto
           valor={fotoUri}
-          onFotoSeleccionada={setFotoUri}
+          onFotoSeleccionada={(uri) => setFotoUri(uri === '' ? undefined : uri)}
           size={96}
         />
 

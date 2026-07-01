@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar,
+  ScrollView, SafeAreaView, StatusBar, Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { getDatabase } from '../database/database';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -50,6 +52,23 @@ const MODULOS: {
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
+  const [fotoUri, setFotoUri] = useState<string | undefined>(undefined);
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        try {
+          const db = await getDatabase();
+          const row = await db.getFirstAsync<{ foto_uri: string | null }>(
+            'SELECT foto_uri FROM entrenador LIMIT 1',
+          );
+          setFotoUri(row?.foto_uri ?? undefined);
+        } catch {
+          // sin foto, no crítico
+        }
+      })();
+    }, []),
+  );
 
   return (
     <View style={styles.raiz}>
@@ -59,9 +78,13 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.cabecera}>
         <View style={styles.cabeceraTop}>
           <Text style={styles.cabeceraClub}>Club Deportivo Linces</Text>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarLetra}>E</Text>
-          </View>
+          {fotoUri ? (
+            <Image source={{ uri: fotoUri }} style={styles.avatarFoto} resizeMode="cover" />
+          ) : (
+            <View style={styles.avatar}>
+              <Text style={styles.avatarLetra}>E</Text>
+            </View>
+          )}
         </View>
         <View style={styles.cabeceraBottom}>
           <Text style={styles.saludo}>Bienvenido,</Text>
@@ -116,6 +139,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
+  },
+  avatarFoto: {
+    width: 40, height: 40, borderRadius: 20,
+    borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
+    overflow: 'hidden',
   },
   avatarLetra: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 

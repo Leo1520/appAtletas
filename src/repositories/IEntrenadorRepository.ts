@@ -10,5 +10,5 @@ export interface IEntrenadorRepository {
   ): Promise<Entrenador>;
   obtenerPorCorreo(correo: string): Promise<Entrenador | null>;
   actualizarContrasena(correo: string, contrasenhaHash: string): Promise<void>;
-  actualizarFoto(id: number, fotoUri: string): Promise<void>;
+  actualizarFoto(id: number, fotoUri: string | null): Promise<void>;
 }
