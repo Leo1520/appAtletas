@@ -11,19 +11,17 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
-  // Migraciones de columnas nuevas en entrenador
-  try { await db.execAsync('ALTER TABLE entrenador ADD COLUMN foto_uri TEXT'); } catch { /* ya existe */ }
-  try { await db.execAsync('ALTER TABLE entrenador ADD COLUMN nombre TEXT');   } catch { /* ya existe */ }
-
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
 
     CREATE TABLE IF NOT EXISTS entrenador (
       id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre              TEXT,
       correo              TEXT    NOT NULL UNIQUE,
       contrasena          TEXT    NOT NULL,
       pregunta_seguridad  TEXT,
-      respuesta_seguridad TEXT
+      respuesta_seguridad TEXT,
+      foto_uri            TEXT
     );
 
     CREATE TABLE IF NOT EXISTS atletas (
