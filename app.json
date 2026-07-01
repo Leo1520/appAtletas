@@ -31,7 +31,8 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -55,6 +56,11 @@
           "defaultChannel": "sesiones"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4d432712-7d0c-4740-bd3d-2d3a9e50c0a7"
+      }
+    }
   }
 }
