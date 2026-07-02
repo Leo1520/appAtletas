@@ -1,10 +1,11 @@
 import { getDatabase } from '../database/database';
 import { Atleta } from '../types';
 import { IAtletaRepository } from './IAtletaRepository';
+import { getEntrenadorActual } from '../services/SesionService';
 
-// Forma exacta en que expo-sqlite devuelve una fila de la tabla atletas
 interface AtletaRow {
   id: number;
+  entrenador_id: number;
   nombre: string;
   apellido: string;
   fecha_nacimiento: string;
@@ -31,11 +32,14 @@ function mapearFila(row: AtletaRow): Atleta {
 
 export class AtletaRepository implements IAtletaRepository {
   async crear(atleta: Omit<Atleta, 'id'>): Promise<Atleta> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) throw new Error('No hay entrenador en sesión');
     const db = await getDatabase();
     const result = await db.runAsync(
       `INSERT INTO atletas
-         (nombre, apellido, fecha_nacimiento, disciplina, categoria, grupo, foto_uri, activo)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (entrenador_id, nombre, apellido, fecha_nacimiento, disciplina, categoria, grupo, foto_uri, activo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      entrenadorId,
       atleta.nombre,
       atleta.apellido,
       atleta.fechaNacimiento,
@@ -83,44 +87,60 @@ export class AtletaRepository implements IAtletaRepository {
   }
 
   async listarActivos(): Promise<Atleta[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<AtletaRow>(
-      'SELECT * FROM atletas WHERE activo = 1 ORDER BY apellido, nombre',
+      'SELECT * FROM atletas WHERE activo = 1 AND entrenador_id = ? ORDER BY apellido, nombre',
+      entrenadorId,
     );
     return rows.map(mapearFila);
   }
 
   async listarTodos(): Promise<Atleta[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<AtletaRow>(
-      'SELECT * FROM atletas ORDER BY apellido, nombre',
+      'SELECT * FROM atletas WHERE entrenador_id = ? ORDER BY apellido, nombre',
+      entrenadorId,
     );
     return rows.map(mapearFila);
   }
 
   async listarDisciplinas(): Promise<string[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<{ disciplina: string }>(
-      'SELECT DISTINCT disciplina FROM atletas WHERE disciplina IS NOT NULL ORDER BY disciplina',
+      'SELECT DISTINCT disciplina FROM atletas WHERE disciplina IS NOT NULL AND entrenador_id = ? ORDER BY disciplina',
+      entrenadorId,
     );
     return rows.map((r) => r.disciplina);
   }
 
   async listarGrupos(): Promise<string[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<{ grupo: string }>(
-      'SELECT DISTINCT grupo FROM atletas WHERE grupo IS NOT NULL ORDER BY grupo',
+      'SELECT DISTINCT grupo FROM atletas WHERE grupo IS NOT NULL AND entrenador_id = ? ORDER BY grupo',
+      entrenadorId,
     );
     return rows.map((r) => r.grupo);
   }
 
   async buscarPorNombre(nombre: string): Promise<Atleta[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<AtletaRow>(
       `SELECT * FROM atletas
        WHERE activo = 1
+         AND entrenador_id = ?
          AND (nombre LIKE ? OR apellido LIKE ?)
        ORDER BY apellido, nombre`,
+      entrenadorId,
       `%${nombre}%`,
       `%${nombre}%`,
     );

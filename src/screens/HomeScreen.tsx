@@ -9,6 +9,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { getDatabase } from '../database/database';
+import { getEntrenadorActual } from '../services/SesionService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -63,11 +64,16 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setFotoUri(undefined);
+      setNombre('');
+      const entrenadorId = getEntrenadorActual();
+      if (entrenadorId === null) return;
       (async () => {
         try {
           const db = await getDatabase();
           const row = await db.getFirstAsync<{ foto_uri: string | null; nombre: string | null }>(
-            'SELECT foto_uri, nombre FROM entrenador LIMIT 1',
+            'SELECT foto_uri, nombre FROM entrenador WHERE id = ?',
+            entrenadorId,
           );
           setFotoUri(row?.foto_uri ?? undefined);
           setNombre(row?.nombre ?? '');

@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, Alert, ScrollView,
+  SafeAreaView, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
 import { EntrenadorRepository } from '../repositories/EntrenadorRepository';
+import { iniciarSesion } from '../services/AuthService';
+import { getEntrenadorActual, limpiarSesion } from '../services/SesionService';
+import { getDatabase } from '../database/database';
 import SelectorFoto from '../components/SelectorFoto';
 
 const repo = new EntrenadorRepository();
@@ -20,26 +23,41 @@ export default function PerfilEntrenadorScreen() {
   const [fotoUri,  setFotoUri]  = useState<string | undefined>(undefined);
   const [guardando, setGuardando] = useState(false);
 
-  useEffect(() => {
-    cargarEntrenador();
-  }, []);
+  // ── Eliminar cuenta ──────────────────────────────────────────────────────────
+  const [modalEliminar, setModalEliminar]   = useState(false);
+  const [passEliminar,  setPassEliminar]    = useState('');
+  const [errorEliminar, setErrorEliminar]   = useState('');
+  const [eliminando,    setEliminando]      = useState(false);
 
-  async function cargarEntrenador() {
-    try {
-      const db = await import('../database/database').then((m) => m.getDatabase());
-      const row = await db.getFirstAsync<{
-        id: number; correo: string; nombre: string | null; foto_uri: string | null;
-      }>('SELECT id, correo, nombre, foto_uri FROM entrenador LIMIT 1');
-      if (row) {
-        setEntrenadorId(row.id);
-        setCorreo(row.correo);
-        setNombre(row.nombre ?? '');
-        setFotoUri(row.foto_uri ?? undefined);
-      }
-    } catch {
-      // no crítico
-    }
-  }
+  useFocusEffect(
+    useCallback(() => {
+      // Limpia estado anterior antes de cargar el entrenador actual
+      setEntrenadorId(null);
+      setCorreo('');
+      setNombre('');
+      setFotoUri(undefined);
+
+      const id = getEntrenadorActual();
+      if (id === null) return;
+
+      (async () => {
+        try {
+          const db = await getDatabase();
+          const row = await db.getFirstAsync<{
+            id: number; correo: string; nombre: string | null; foto_uri: string | null;
+          }>('SELECT id, correo, nombre, foto_uri FROM entrenador WHERE id = ?', id);
+          if (row) {
+            setEntrenadorId(row.id);
+            setCorreo(row.correo);
+            setNombre(row.nombre ?? '');
+            setFotoUri(row.foto_uri ?? undefined);
+          }
+        } catch {
+          // no crítico
+        }
+      })();
+    }, []),
+  );
 
   async function handleFotoSeleccionada(uri: string) {
     if (entrenadorId === null) return;
@@ -69,6 +87,43 @@ export default function PerfilEntrenadorScreen() {
     }
   }
 
+  function abrirEliminarCuenta() {
+    Alert.alert(
+      'Eliminar cuenta',
+      'Esta acción eliminará permanentemente tu cuenta, todos los atletas, sesiones, marcas y competencias registradas. No se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Continuar', style: 'destructive',
+          onPress: () => {
+            setPassEliminar('');
+            setErrorEliminar('');
+            setModalEliminar(true);
+          },
+        },
+      ],
+    );
+  }
+
+  async function handleConfirmarEliminar() {
+    if (!passEliminar) { setErrorEliminar('Ingresa tu contraseña.'); return; }
+    if (entrenadorId === null) return;
+    setEliminando(true);
+    setErrorEliminar('');
+    try {
+      const ok = await iniciarSesion(correo, passEliminar);
+      if (!ok) { setErrorEliminar('Contraseña incorrecta. Intenta de nuevo.'); return; }
+      await repo.eliminarCuenta(entrenadorId);
+      setModalEliminar(false);
+      limpiarSesion();
+      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Registro' }] }));
+    } catch {
+      setErrorEliminar('Ocurrió un error. Intenta de nuevo.');
+    } finally {
+      setEliminando(false);
+    }
+  }
+
   function handleCerrarSesion() {
     Alert.alert(
       'Cerrar sesión',
@@ -77,10 +132,12 @@ export default function PerfilEntrenadorScreen() {
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Cerrar sesión', style: 'destructive',
-          onPress: () =>
+          onPress: () => {
+            limpiarSesion();
             navigation.dispatch(
               CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }),
-            ),
+            );
+          },
         },
       ],
     );
@@ -142,6 +199,11 @@ export default function PerfilEntrenadorScreen() {
             <Feather name="log-out" size={18} color="#C0392B" />
             <Text style={styles.botonSalirTexto}>  Cerrar sesión</Text>
           </TouchableOpacity>
+
+          {/* Eliminar cuenta */}
+          <TouchableOpacity style={styles.botonEliminar} onPress={abrirEliminarCuenta} activeOpacity={0.7}>
+            <Text style={styles.botonEliminarTexto}>Eliminar cuenta</Text>
+          </TouchableOpacity>
         </ScrollView>
 
         {/* Versión — pegada al fondo */}
@@ -150,6 +212,52 @@ export default function PerfilEntrenadorScreen() {
           <Text style={styles.versionNumero}>Versión {Constants.expoConfig?.version ?? '1.0.0'}</Text>
         </View>
       </View>
+
+      {/* ── Modal confirmar contraseña ── */}
+      <Modal visible={modalEliminar} transparent animationType="fade" onRequestClose={() => setModalEliminar(false)}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.modalHoja}>
+            <View style={styles.modalCabecera}>
+              <Feather name="alert-triangle" size={20} color="#C0392B" />
+              <Text style={styles.modalTitulo}>  Confirmar eliminación</Text>
+            </View>
+            <Text style={styles.modalDesc}>
+              Ingresa tu contraseña actual para confirmar que deseas eliminar la cuenta permanentemente.
+            </Text>
+            <TextInput
+              style={[styles.modalInput, errorEliminar ? { borderColor: '#C0392B' } : null]}
+              value={passEliminar}
+              onChangeText={setPassEliminar}
+              secureTextEntry
+              placeholder="Tu contraseña"
+              placeholderTextColor="#9CA3AF"
+              autoFocus
+            />
+            {errorEliminar ? <Text style={styles.modalError}>{errorEliminar}</Text> : null}
+            <View style={styles.modalBotones}>
+              <TouchableOpacity
+                style={styles.modalBtnCancelar}
+                onPress={() => setModalEliminar(false)}
+                disabled={eliminando}
+              >
+                <Text style={styles.modalBtnCancelarTexto}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalBtnEliminar, eliminando && { opacity: 0.55 }]}
+                onPress={handleConfirmarEliminar}
+                disabled={eliminando}
+              >
+                <Text style={styles.modalBtnEliminarTexto}>
+                  {eliminando ? 'Eliminando…' : 'Eliminar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -211,4 +319,36 @@ const styles = StyleSheet.create({
   versionCont:   { alignItems: 'center', paddingBottom: 16, paddingTop: 12 },
   versionClub:   { fontSize: 11, color: '#9CA3AF' },
   versionNumero: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+
+  botonEliminar: {
+    alignItems: 'center', paddingVertical: 12, marginTop: 12,
+  },
+  botonEliminarTexto: { color: '#9CA3AF', fontSize: 13, textDecorationLine: 'underline' },
+
+  // Modal eliminar
+  modalOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 24 },
+  modalHoja: {
+    backgroundColor: '#FFF', borderRadius: 16, padding: 24,
+    shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, elevation: 8,
+  },
+  modalCabecera: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  modalTitulo:   { fontSize: 16, fontWeight: '700', color: '#C0392B' },
+  modalDesc:     { fontSize: 13, color: '#6B7280', lineHeight: 18, marginBottom: 16 },
+  modalInput: {
+    borderWidth: 1, borderColor: '#E0E0E0', borderRadius: 8,
+    paddingHorizontal: 12, paddingVertical: 11,
+    fontSize: 15, color: '#333', backgroundColor: '#F9FAFB',
+  },
+  modalError: { color: '#C0392B', fontSize: 12, marginTop: 6 },
+  modalBotones: { flexDirection: 'row', gap: 10, marginTop: 20 },
+  modalBtnCancelar: {
+    flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: 'center',
+    borderWidth: 1, borderColor: '#E0E0E0',
+  },
+  modalBtnCancelarTexto: { color: '#6B7280', fontSize: 15 },
+  modalBtnEliminar: {
+    flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: 'center',
+    backgroundColor: '#C0392B',
+  },
+  modalBtnEliminarTexto: { color: '#FFF', fontSize: 15, fontWeight: '600' },
 });

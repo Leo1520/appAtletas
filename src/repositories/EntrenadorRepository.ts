@@ -95,4 +95,29 @@ export class EntrenadorRepository implements IEntrenadorRepository {
       id,
     );
   }
+
+  async eliminarCuenta(id: number): Promise<void> {
+    const db = await getDatabase();
+    // Borrar en orden inverso de dependencias FK, filtrando solo datos del entrenador
+    await db.runAsync(
+      `DELETE FROM competencia_atleta
+       WHERE atleta_id IN (SELECT id FROM atletas WHERE entrenador_id = ?)
+          OR competencia_id IN (SELECT id FROM competencias WHERE entrenador_id = ?)`,
+      id, id,
+    );
+    await db.runAsync(
+      `DELETE FROM asistencia
+       WHERE atleta_id IN (SELECT id FROM atletas WHERE entrenador_id = ?)`,
+      id,
+    );
+    await db.runAsync(
+      `DELETE FROM marcas
+       WHERE atleta_id IN (SELECT id FROM atletas WHERE entrenador_id = ?)`,
+      id,
+    );
+    await db.runAsync('DELETE FROM competencias WHERE entrenador_id = ?', id);
+    await db.runAsync('DELETE FROM sesiones    WHERE entrenador_id = ?', id);
+    await db.runAsync('DELETE FROM atletas     WHERE entrenador_id = ?', id);
+    await db.runAsync('DELETE FROM entrenador  WHERE id = ?', id);
+  }
 }

@@ -11,8 +11,11 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
-  // Migración para DBs existentes
-  try { await db.execAsync('ALTER TABLE sesiones ADD COLUMN notification_id TEXT'); } catch { /* ya existe */ }
+  // Migraciones para DBs existentes
+  try { await db.execAsync('ALTER TABLE sesiones    ADD COLUMN notification_id TEXT'); }              catch { /* ya existe */ }
+  try { await db.execAsync('ALTER TABLE atletas     ADD COLUMN entrenador_id INTEGER NOT NULL DEFAULT 1'); } catch { /* ya existe */ }
+  try { await db.execAsync('ALTER TABLE sesiones    ADD COLUMN entrenador_id INTEGER NOT NULL DEFAULT 1'); } catch { /* ya existe */ }
+  try { await db.execAsync('ALTER TABLE competencias ADD COLUMN entrenador_id INTEGER NOT NULL DEFAULT 1'); } catch { /* ya existe */ }
 
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
@@ -29,6 +32,7 @@ async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
 
     CREATE TABLE IF NOT EXISTS atletas (
       id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      entrenador_id    INTEGER NOT NULL DEFAULT 1,
       nombre           TEXT    NOT NULL,
       apellido         TEXT    NOT NULL,
       fecha_nacimiento TEXT    NOT NULL,
@@ -41,6 +45,7 @@ async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
 
     CREATE TABLE IF NOT EXISTS sesiones (
       id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+      entrenador_id      INTEGER NOT NULL DEFAULT 1,
       fecha              TEXT    NOT NULL,
       hora_inicio        TEXT    NOT NULL,
       hora_fin           TEXT,
@@ -78,11 +83,12 @@ async function crearTablas(db: SQLite.SQLiteDatabase): Promise<void> {
     );
 
     CREATE TABLE IF NOT EXISTS competencias (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre      TEXT NOT NULL,
-      fecha       TEXT NOT NULL,
-      lugar       TEXT NOT NULL,
-      descripcion TEXT
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      entrenador_id INTEGER NOT NULL DEFAULT 1,
+      nombre        TEXT    NOT NULL,
+      fecha         TEXT    NOT NULL,
+      lugar         TEXT    NOT NULL,
+      descripcion   TEXT
     );
 
     CREATE TABLE IF NOT EXISTS competencia_atleta (

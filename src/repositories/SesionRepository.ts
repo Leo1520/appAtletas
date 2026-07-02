@@ -1,9 +1,11 @@
 import { getDatabase } from '../database/database';
 import { Sesion } from '../types';
 import { ISesionRepository } from './ISesionRepository';
+import { getEntrenadorActual } from '../services/SesionService';
 
 interface SesionRow {
   id: number;
+  entrenador_id: number;
   fecha: string;
   hora_inicio: string;
   hora_fin: string | null;
@@ -34,11 +36,14 @@ function mapearFila(row: SesionRow): Sesion {
 
 export class SesionRepository implements ISesionRepository {
   async crear(sesion: Omit<Sesion, 'id'>): Promise<Sesion> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) throw new Error('No hay entrenador en sesión');
     const db = await getDatabase();
     const result = await db.runAsync(
       `INSERT INTO sesiones
-         (fecha, hora_inicio, hora_fin, descripcion, disciplina, lugar, grupo, estado, motivo_cancelacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (entrenador_id, fecha, hora_inicio, hora_fin, descripcion, disciplina, lugar, grupo, estado, motivo_cancelacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      entrenadorId,
       sesion.fecha,
       sesion.horaInicio,
       sesion.horaFin ?? null,
@@ -94,13 +99,16 @@ export class SesionRepository implements ISesionRepository {
   }
 
   async listarPorSemana(fechaInicio: string, fechaFin: string): Promise<Sesion[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<SesionRow>(
       `SELECT * FROM sesiones
-       WHERE fecha BETWEEN ? AND ?
+       WHERE fecha BETWEEN ? AND ? AND entrenador_id = ?
        ORDER BY fecha, hora_inicio`,
       fechaInicio,
       fechaFin,
+      entrenadorId,
     );
     return rows.map(mapearFila);
   }
@@ -115,13 +123,16 @@ export class SesionRepository implements ISesionRepository {
   }
 
   async listarProximas(fechas: string[]): Promise<Sesion[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const placeholders = fechas.map(() => '?').join(', ');
     const rows = await db.getAllAsync<SesionRow>(
       `SELECT * FROM sesiones
-       WHERE fecha IN (${placeholders}) AND estado = 'activa'
+       WHERE fecha IN (${placeholders}) AND estado = 'activa' AND entrenador_id = ?
        ORDER BY fecha, hora_inicio`,
       ...fechas,
+      entrenadorId,
     );
     return rows.map(mapearFila);
   }

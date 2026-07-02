@@ -1,6 +1,7 @@
 import { getDatabase } from '../database/database';
 import { Marca } from '../types';
 import { IMarcaRepository } from './IMarcaRepository';
+import { getEntrenadorActual } from '../services/SesionService';
 
 interface MarcaRow {
   id: number;
@@ -57,9 +58,15 @@ export class MarcaRepository implements IMarcaRepository {
   }
 
   async listarTodas(): Promise<Marca[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<MarcaRow>(
-      'SELECT * FROM marcas ORDER BY fecha DESC, id DESC',
+      `SELECT m.* FROM marcas m
+       JOIN atletas a ON a.id = m.atleta_id
+       WHERE a.entrenador_id = ?
+       ORDER BY m.fecha DESC, m.id DESC`,
+      entrenadorId,
     );
     return rows.map(mapearFila);
   }

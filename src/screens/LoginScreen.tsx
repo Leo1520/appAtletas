@@ -180,6 +180,11 @@ export default function LoginScreen({ navigation }: Props) {
             <Feather name="lock" size={13} color="#6B7280" />
             <Text style={styles.linkRecuperarTexto}>  ¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.linkCrear} onPress={() => navigation.navigate('Registro')}>
+            <Text style={styles.linkCrearTexto}>¿Primera vez? </Text>
+            <Text style={[styles.linkCrearTexto, { fontWeight: '700', color: '#2E4057' }]}>Crear cuenta</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -353,6 +358,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center', marginTop: 16, paddingVertical: 4,
   },
   linkRecuperarTexto: { color: '#6B7280', fontSize: 13 },
+
+  linkCrear: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', marginTop: 12, paddingVertical: 4,
+  },
+  linkCrearTexto: { color: '#6B7280', fontSize: 13 },
 
   // Modal
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.45)' },

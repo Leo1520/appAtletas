@@ -13,4 +13,5 @@ export interface IEntrenadorRepository {
   actualizarContrasena(correo: string, contrasenhaHash: string): Promise<void>;
   actualizarFoto(id: number, fotoUri: string | null): Promise<void>;
   actualizarNombre(id: number, nombre: string): Promise<void>;
+  eliminarCuenta(id: number): Promise<void>;
 }

@@ -1,9 +1,11 @@
 import { getDatabase } from '../database/database';
 import { Competencia, CompetenciaAtleta } from '../types';
 import { ICompetenciaRepository } from './ICompetenciaRepository';
+import { getEntrenadorActual } from '../services/SesionService';
 
 interface CompetenciaRow {
   id: number;
+  entrenador_id: number;
   nombre: string;
   fecha: string;
   lugar: string;
@@ -40,9 +42,12 @@ function mapearCompetenciaAtleta(row: CompetenciaAtletaRow): CompetenciaAtleta {
 
 export class CompetenciaRepository implements ICompetenciaRepository {
   async listar(): Promise<Competencia[]> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) return [];
     const db = await getDatabase();
     const rows = await db.getAllAsync<CompetenciaRow>(
-      'SELECT * FROM competencias ORDER BY fecha DESC, id DESC',
+      'SELECT * FROM competencias WHERE entrenador_id = ? ORDER BY fecha DESC, id DESC',
+      entrenadorId,
     );
     return rows.map(mapearCompetencia);
   }
@@ -57,9 +62,12 @@ export class CompetenciaRepository implements ICompetenciaRepository {
   }
 
   async crear(competencia: Omit<Competencia, 'id'>): Promise<Competencia> {
+    const entrenadorId = getEntrenadorActual();
+    if (entrenadorId === null) throw new Error('No hay entrenador en sesión');
     const db = await getDatabase();
     const result = await db.runAsync(
-      'INSERT INTO competencias (nombre, fecha, lugar, descripcion) VALUES (?, ?, ?, ?)',
+      'INSERT INTO competencias (entrenador_id, nombre, fecha, lugar, descripcion) VALUES (?, ?, ?, ?, ?)',
+      entrenadorId,
       competencia.nombre,
       competencia.fecha,
       competencia.lugar,

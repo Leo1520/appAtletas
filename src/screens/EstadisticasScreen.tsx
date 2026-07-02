@@ -5,6 +5,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDatabase } from '../database/database';
+import { getEntrenadorActual } from '../services/SesionService';
 
 interface Stats {
   atletasActivos: number;
@@ -32,32 +33,38 @@ export default function EstadisticasScreen() {
   async function cargar() {
     setCargando(true);
     try {
+      const entrenadorId = getEntrenadorActual();
+      if (entrenadorId === null) { setCargando(false); return; }
       const db = await getDatabase();
       const mes = mesActual();
 
       const [rowAtletas, rowSesiones, rowAsistencia, rowsTop] = await Promise.all([
         db.getFirstAsync<{ total: number }>(
-          'SELECT COUNT(*) AS total FROM atletas WHERE activo = 1',
+          'SELECT COUNT(*) AS total FROM atletas WHERE activo = 1 AND entrenador_id = ?',
+          entrenadorId,
         ),
         db.getFirstAsync<{ total: number }>(
-          `SELECT COUNT(*) AS total FROM sesiones WHERE fecha LIKE ?`,
+          `SELECT COUNT(*) AS total FROM sesiones WHERE fecha LIKE ? AND entrenador_id = ?`,
           `${mes}-%`,
+          entrenadorId,
         ),
         db.getFirstAsync<{ porcentaje: number | null }>(
           `SELECT
              CAST(COUNT(CASE WHEN a.estado = 'P' THEN 1 END) AS REAL) * 100.0 / NULLIF(COUNT(*), 0) AS porcentaje
            FROM asistencia a
-           WHERE a.sesion_id IN (SELECT id FROM sesiones WHERE fecha LIKE ?)`,
+           WHERE a.sesion_id IN (SELECT id FROM sesiones WHERE fecha LIKE ? AND entrenador_id = ?)`,
           `${mes}-%`,
+          entrenadorId,
         ),
         db.getAllAsync<{ nombre: string; apellido: string; total: number }>(
           `SELECT at.nombre, at.apellido, COUNT(*) AS total
            FROM marcas m
            JOIN atletas at ON at.id = m.atleta_id
-           WHERE m.es_marca_personal = 1
+           WHERE m.es_marca_personal = 1 AND at.entrenador_id = ?
            GROUP BY m.atleta_id
            ORDER BY total DESC
            LIMIT 3`,
+          entrenadorId,
         ),
       ]);
 

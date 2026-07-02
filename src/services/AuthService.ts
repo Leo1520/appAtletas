@@ -1,5 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { EntrenadorRepository } from '../repositories/EntrenadorRepository';
+import { setEntrenadorActual } from './SesionService';
 
 const repo = new EntrenadorRepository();
 
@@ -20,7 +21,14 @@ export async function registrarEntrenador(
 ): Promise<void> {
   const contrasenhaHash = await hashear(contrasena);
   const respuestaHash   = await hashear(respuestaSeguridad.trim().toLowerCase());
-  await repo.registrar(correo.trim().toLowerCase(), contrasenhaHash, preguntaSeguridad, respuestaHash, nombre.trim());
+  const entrenador = await repo.registrar(
+    correo.trim().toLowerCase(),
+    contrasenhaHash,
+    preguntaSeguridad,
+    respuestaHash,
+    nombre.trim(),
+  );
+  setEntrenadorActual(entrenador.id);
 }
 
 export async function iniciarSesion(correo: string, contrasena: string): Promise<boolean> {
@@ -28,7 +36,9 @@ export async function iniciarSesion(correo: string, contrasena: string): Promise
   if (!entrenador) return false;
 
   const contrasenhaHash = await hashear(contrasena);
-  return entrenador.contrasena === contrasenhaHash;
+  const ok = entrenador.contrasena === contrasenhaHash;
+  if (ok) setEntrenadorActual(entrenador.id);
+  return ok;
 }
 
 export async function verificarRespuestaSeguridad(
