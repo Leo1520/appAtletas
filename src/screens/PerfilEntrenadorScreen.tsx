@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, Alert, ScrollView,
 } from 'react-native';
+import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
@@ -126,18 +127,11 @@ export default function PerfilEntrenadorScreen() {
 
         {/* Info */}
         <View style={styles.seccion}>
-          <View style={styles.filaInfo}>
+          <View style={[styles.filaInfo, { borderBottomWidth: 0 }]}>
             <Feather name="shield" size={18} color="#2E4057" />
             <View style={styles.filaInfoTexto}>
               <Text style={styles.filaInfoLabel}>Rol</Text>
               <Text style={styles.filaInfoValor}>Entrenador principal</Text>
-            </View>
-          </View>
-          <View style={[styles.filaInfo, { borderBottomWidth: 0 }]}>
-            <Feather name="database" size={18} color="#2E4057" />
-            <View style={styles.filaInfoTexto}>
-              <Text style={styles.filaInfoLabel}>Almacenamiento</Text>
-              <Text style={styles.filaInfoValor}>Local · SQLite</Text>
             </View>
           </View>
         </View>
@@ -147,6 +141,12 @@ export default function PerfilEntrenadorScreen() {
           <Feather name="log-out" size={18} color="#C0392B" />
           <Text style={styles.botonSalirTexto}>  Cerrar sesión</Text>
         </TouchableOpacity>
+
+        {/* Versión */}
+        <View style={styles.versionCont}>
+          <Text style={styles.versionClub}>Club Deportivo Linces</Text>
+          <Text style={styles.versionNumero}>Versión {Constants.expoConfig?.version ?? '1.0.0'}</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -203,4 +203,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   botonSalirTexto: { color: '#C0392B', fontSize: 15, fontWeight: '600' },
+
+  versionCont:   { alignItems: 'center', marginTop: 32 },
+  versionClub:   { fontSize: 11, color: '#9CA3AF' },
+  versionNumero: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
 });
