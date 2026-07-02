@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, Alert, Modal, ScrollView, Image,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -18,6 +19,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 type Paso = 1 | 2 | 3;
 
 export default function LoginScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
+
   // ── Login ────────────────────────────────────────────────────────────────────
   const [correo, setCorreo]         = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -120,7 +123,7 @@ export default function LoginScreen({ navigation }: Props) {
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView

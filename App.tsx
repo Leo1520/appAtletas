@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import AppNavigator from './src/navigation/AppNavigator';
 import { configurarCanal, solicitarPermisos } from './src/services/NotificacionService';
@@ -17,8 +18,10 @@ export default function App() {
   }, []);
 
   return (
-    <ActionSheetProvider>
-      <AppNavigator />
-    </ActionSheetProvider>
+    <SafeAreaProvider>
+      <ActionSheetProvider>
+        <AppNavigator />
+      </ActionSheetProvider>
+    </SafeAreaProvider>
   );
 }

@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
@@ -80,7 +81,7 @@ export default function AgendaSemanalScreen() {
   }).filter((d) => d.sesiones.length > 0);
 
   return (
-    <View style={styles.contenedor}>
+    <SafeAreaView style={styles.contenedor} edges={['top']}>
       {/* Navegación de semana */}
       <View style={styles.navSemana}>
         <TouchableOpacity onPress={() => setOffset((o) => o - 1)} style={styles.navBtn}>
@@ -122,7 +123,7 @@ export default function AgendaSemanalScreen() {
           ))}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

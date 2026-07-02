@@ -82,10 +82,6 @@ export default function NotificacionesScreen() {
 
   return (
     <View style={styles.raiz}>
-      <View style={styles.cabecera}>
-        <Text style={styles.cabeceraTitulo}>Notificaciones</Text>
-      </View>
-
       {cargando ? (
         <ActivityIndicator style={{ marginTop: 40 }} color="#2E4057" />
       ) : sesiones.length === 0 ? (
@@ -117,12 +113,6 @@ export default function NotificacionesScreen() {
 
 const styles = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: '#F0F2F5' },
-
-  cabecera: {
-    backgroundColor: '#2E4057',
-    paddingHorizontal: 20, paddingTop: 52, paddingBottom: 20,
-  },
-  cabeceraTitulo: { fontSize: 20, fontWeight: '700', color: '#FFF' },
 
   lista:     { padding: 16, paddingBottom: 32 },
   vacioCont: { flex: 1, alignItems: 'center', justifyContent: 'center' },

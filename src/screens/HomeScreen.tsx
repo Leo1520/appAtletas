@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar, Image,
+  ScrollView, StatusBar, Image,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -59,6 +60,7 @@ const MODULOS: {
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
+  const insets     = useSafeAreaInsets();
   const [fotoUri, setFotoUri] = useState<string | undefined>(undefined);
   const [nombre,  setNombre]  = useState<string>('');
 
@@ -93,7 +95,7 @@ export default function HomeScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#2E4057" />
 
       {/* ── CABECERA ── */}
-      <SafeAreaView style={styles.cabecera}>
+      <View style={[styles.cabecera, { paddingTop: insets.top }]}>
         <View style={styles.cabeceraTop}>
           <Text style={styles.cabeceraClub}>Club Deportivo Linces</Text>
           <View style={styles.cabeceraAcciones}>
@@ -113,7 +115,7 @@ export default function HomeScreen() {
           <Text style={styles.saludo}>Bienvenido,</Text>
           <Text style={styles.saludoNombre}>{nombre || 'Entrenador'}</Text>
         </View>
-      </SafeAreaView>
+      </View>
 
       {/* ── CUERPO ── */}
       <ScrollView

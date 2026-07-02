@@ -77,7 +77,7 @@ export default function AppNavigator() {
         <Stack.Screen name="CrearCompetencia"    component={CrearCompetenciaScreen}     options={{ title: 'Nueva competencia' }} />
         <Stack.Screen name="DetalleCompetencia"  component={DetalleCompetenciaScreen}   options={{ title: 'Competencia' }} />
         <Stack.Screen name="Estadisticas"    component={EstadisticasScreen}    options={{ title: 'Estadísticas' }} />
-        <Stack.Screen name="Notificaciones" component={NotificacionesScreen}  options={{ headerShown: false }} />
+        <Stack.Screen name="Notificaciones" component={NotificacionesScreen}  options={{ title: 'Notificaciones' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

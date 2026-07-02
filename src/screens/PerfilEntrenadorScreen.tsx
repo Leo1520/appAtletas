@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, Alert, ScrollView, Modal, KeyboardAvoidingView, Platform,
+  Alert, ScrollView, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -17,6 +18,7 @@ const repo = new EntrenadorRepository();
 
 export default function PerfilEntrenadorScreen() {
   const navigation = useNavigation();
+  const insets     = useSafeAreaInsets();
   const [entrenadorId, setEntrenadorId] = useState<number | null>(null);
   const [correo,   setCorreo]   = useState('');
   const [nombre,   setNombre]   = useState('');
@@ -145,9 +147,9 @@ export default function PerfilEntrenadorScreen() {
 
   return (
     <View style={styles.raiz}>
-      <SafeAreaView style={styles.cabecera}>
+      <View style={[styles.cabecera, { paddingTop: insets.top + 16 }]}>
         <Text style={styles.cabeceraTitulo}>Perfil</Text>
-      </SafeAreaView>
+      </View>
 
       <View style={styles.contenido}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.cuerpo}>
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
   contenido: { flex: 1 },
   scroll:    { flex: 1 },
 
-  cabecera: { backgroundColor: '#2E4057', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
+  cabecera: { backgroundColor: '#2E4057', paddingHorizontal: 20, paddingBottom: 20 },
   cabeceraTitulo: { fontSize: 20, fontWeight: '700', color: '#FFF' },
 
   cuerpo: { padding: 20, paddingBottom: 40 },
