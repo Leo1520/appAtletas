@@ -92,68 +92,72 @@ export default function PerfilEntrenadorScreen() {
         <Text style={styles.cabeceraTitulo}>Perfil</Text>
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={styles.cuerpo}>
-        {/* Foto */}
-        <View style={styles.avatarCont}>
-          <SelectorFoto
-            valor={fotoUri}
-            onFotoSeleccionada={handleFotoSeleccionada}
-            size={100}
-          />
-          <Text style={styles.correoLabel}>{correo}</Text>
-        </View>
-
-        {/* Nombre editable */}
-        <View style={styles.seccion}>
-          <Text style={styles.seccionTitulo}>Nombre</Text>
-          <View style={styles.filaInput}>
-            <TextInput
-              style={styles.inputNombre}
-              value={nombre}
-              onChangeText={setNombre}
-              placeholder="Tu nombre completo"
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="words"
+      <View style={styles.contenido}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.cuerpo}>
+          {/* Foto */}
+          <View style={styles.avatarCont}>
+            <SelectorFoto
+              valor={fotoUri}
+              onFotoSeleccionada={handleFotoSeleccionada}
+              size={100}
             />
-            <TouchableOpacity
-              style={[styles.btnGuardar, guardando && { opacity: 0.6 }]}
-              onPress={handleGuardarNombre}
-              disabled={guardando}
-            >
-              <Feather name="check" size={18} color="#FFF" />
-            </TouchableOpacity>
+            <Text style={styles.correoLabel}>{correo}</Text>
           </View>
-        </View>
 
-        {/* Info */}
-        <View style={styles.seccion}>
-          <View style={[styles.filaInfo, { borderBottomWidth: 0 }]}>
-            <Feather name="shield" size={18} color="#2E4057" />
-            <View style={styles.filaInfoTexto}>
-              <Text style={styles.filaInfoLabel}>Rol</Text>
-              <Text style={styles.filaInfoValor}>Entrenador principal</Text>
+          {/* Nombre editable */}
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>Nombre</Text>
+            <View style={styles.filaInput}>
+              <TextInput
+                style={styles.inputNombre}
+                value={nombre}
+                onChangeText={setNombre}
+                placeholder="Tu nombre completo"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="words"
+              />
+              <TouchableOpacity
+                style={[styles.btnGuardar, guardando && { opacity: 0.6 }]}
+                onPress={handleGuardarNombre}
+                disabled={guardando}
+              >
+                <Feather name="check" size={18} color="#FFF" />
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
 
-        {/* Cerrar sesión */}
-        <TouchableOpacity style={styles.botonSalir} onPress={handleCerrarSesion} activeOpacity={0.8}>
-          <Feather name="log-out" size={18} color="#C0392B" />
-          <Text style={styles.botonSalirTexto}>  Cerrar sesión</Text>
-        </TouchableOpacity>
+          {/* Info */}
+          <View style={styles.seccion}>
+            <View style={[styles.filaInfo, { borderBottomWidth: 0 }]}>
+              <Feather name="shield" size={18} color="#2E4057" />
+              <View style={styles.filaInfoTexto}>
+                <Text style={styles.filaInfoLabel}>Rol</Text>
+                <Text style={styles.filaInfoValor}>Entrenador principal</Text>
+              </View>
+            </View>
+          </View>
 
-        {/* Versión */}
+          {/* Cerrar sesión */}
+          <TouchableOpacity style={styles.botonSalir} onPress={handleCerrarSesion} activeOpacity={0.8}>
+            <Feather name="log-out" size={18} color="#C0392B" />
+            <Text style={styles.botonSalirTexto}>  Cerrar sesión</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* Versión — pegada al fondo */}
         <View style={styles.versionCont}>
           <Text style={styles.versionClub}>Club Deportivo Linces</Text>
           <Text style={styles.versionNumero}>Versión {Constants.expoConfig?.version ?? '1.0.0'}</Text>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  raiz: { flex: 1, backgroundColor: '#F0F2F5' },
+  raiz:      { flex: 1, backgroundColor: '#F0F2F5' },
+  contenido: { flex: 1 },
+  scroll:    { flex: 1 },
 
   cabecera: { backgroundColor: '#2E4057', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
   cabeceraTitulo: { fontSize: 20, fontWeight: '700', color: '#FFF' },
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
   },
   botonSalirTexto: { color: '#C0392B', fontSize: 15, fontWeight: '600' },
 
-  versionCont:   { alignItems: 'center', marginTop: 32 },
+  versionCont:   { alignItems: 'center', paddingBottom: 16, paddingTop: 12 },
   versionClub:   { fontSize: 11, color: '#9CA3AF' },
   versionNumero: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
 });
